@@ -1,0 +1,58 @@
+1. Analyse du besoin de la base de données
+
+La base de données est conçue pour une application de livraison de repas ou de produits.
+
+Voici les besoins fonctionnels (incluant la logique applicative) :
+
+Gestion des utilisateurs (centralisée) : Le système gère différents types d'utilisateurs avec des accès différents à la plateforme.
+
+Clients :
+
+Passent des commandes.
+
+Suivent le statut de leur commande.
+
+Suivent la position du livreur en temps réel (après récupération et jusqu'à livraison).
+
+Staff (Employés-restaurant) :
+
+Modifient les menus de leur restaurant.
+
+Voient la position des livreurs disponibles.
+
+Assignent une commande à un livreur (logique de proximité, alerte si > 15 min).
+
+Mettent à jour le statut de la commande ("acceptée", "annulée", "en préparation", "prête", "donnée au livreur", "retour au restau").
+
+Estiment le temps de préparation.
+
+Staff (Livreurs) :
+
+Se connectent et gèrent leur disponibilité.
+
+Voient et acceptent les commandes disponibles.
+
+Voient l'adresse du restaurant et le temps de préparation estimé.
+
+Voient les informations du client (nom, adresse, numéro) après acceptation.
+
+Mettent à jour leur position en temps réel (pour le client et le restaurant).
+
+Mettent à jour le statut de la livraison.
+
+Admin :
+
+Gère l'ensemble de la plateforme (rôles, utilisateurs, restaurants).
+
+Gestion des rôles : Il existe une gestion des rôles ("Admin", "Livreur", "Employés-Restaurant", "Client") qui sont assignés aux utilisateurs. Un utilisateur peut avoir plusieurs rôles (ex: un admin peut aussi être client).
+
+Gestion des restaurants et produits : Le système gère plusieurs restaurants. Chaque restaurant propose un ensemble de produits (menus) avec des détails (prix, description, photo).
+
+Gestion des commandes : Un client peut passer une ou plusieurs commandes. Chaque commande a un statut, un temps de préparation estimé, et est liée à un restaurant.
+
+Détail des commandes : Chaque commande est composée d'un ou plusieurs produits, avec une quantité et un prix unitaire.
+
+Gestion des livraisons : Une livraison est créée pour une commande et est assignée à un livreur (un utilisateur avec le rôle "Livreur").
+
+Assignation du personnel : Les employés et livreurs (utilisateurs) sont liés à un ou plusieurs restaurants.
+
