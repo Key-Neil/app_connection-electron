@@ -1,0 +1,129 @@
+datasource db {
+  provider = "mysql" 
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Role {
+  id_role     Int               @id @default(autoincrement())
+  nom_role    String            @unique
+  utilisateurs EffectuerRole[]
+}
+
+model Utilisateur {
+  id_utilisateur            Int              @id @default(autoincrement())
+  nom                       String
+  prenom                    String
+  email                     String           @unique
+  mot_de_passe_hash         String 
+  telephone                 String?          @unique
+  adresse_livraison_default String?
+  disponibilite             String? 
+  position_lat              Float?
+  position_lon              Float?
+
+  roles           EffectuerRole[] // Relation N-M vers Role
+  staff_de        RestaurantStaff[] // Relation N-M vers Restaurant (si employé/livreur)
+  commandes_passees Command[] @relation("ClientCommandes") // 1-N : Commandes passées par ce client
+  livraisons_faites Livraison[] @relation("LivreurLivraisons") // 1-N : Livraisons faites par ce livreur
+}
+
+model Restaurant {
+  id_restaurant Int       @id @default(autoincrement())
+  nom           String
+  adresse       String?
+  telephone     String?
+  latitude      Float?
+  longitude     Float?
+
+  staff           RestaurantStaff[] // Relation N-M vers Utilisateur
+  produits        Produit[] // 1-N : Produits de ce restaurant
+  commandes_recues Command[] @relation("RestaurantCommandes") // 1-N : Commandes reçues par ce restaurant
+}
+
+model Produit {
+  id_produit    Int               @id @default(autoincrement())
+  nom           String
+  prix          Float
+  description   String?
+  url_photo     String?
+  prix_promo    Float?
+
+  id_restaurant Int
+  restaurant    Restaurant        @relation(fields: [id_restaurant], references: [id_restaurant])
+  
+  // Relation N-M vers Commande
+  commandes     DetailCommande[]
+}
+
+model Commande {
+  id_commande Int      @id @default(autoincrement())
+  date_commande DateTime @default(now())
+  statut        String
+  type_livraison String?
+  temps_preparation_estime_min Int?
+  frais_livraison Float    @default(0)
+
+  id_client   Int
+  client      Utilisateur @relation("ClientCommandes", fields: [id_client], references: [id_utilisateur])
+
+  id_restaurant Int
+  restaurant    Restaurant  @relation("RestaurantCommandes", fields: [id_restaurant], references: [id_restaurant])
+
+  details       DetailCommande[]
+  
+  // Relation 1-1 vers Livraison
+  livraison     Livraison?
+}
+
+model Livraison {
+  id_livraison    Int       @id @default(autoincrement())
+  statut_livraison String
+  note_livraison  String?
+  heure_acceptation DateTime?
+  heure_recuperation DateTime?
+  heure_livraison_effective DateTime?
+
+  id_commande Int       @unique // UNIQUE est la clé pour une relation 1-1
+  commande    Commande  @relation(fields: [id_commande], references: [id_commande])
+
+  // Relation 1-N vers Utilisateur (Livreur)
+  id_livreur  Int? // Peut être null si non assigné
+  livreur     Utilisateur? @relation("LivreurLivraisons", fields: [id_livreur], references: [id_utilisateur])
+}
+
+
+model EffectuerRole {
+  id_utilisateur Int
+  id_role        Int
+  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
+  role           Role        @relation(fields: [id_role], references: [id_role])
+
+  @@id([id_utilisateur, id_role]) // Clé primaire composite
+}
+
+model RestaurantStaff {
+  id_utilisateur Int
+  id_restaurant  Int
+  utilisateur    Utilisateur @relation(fields: [id_utilisateur], references: [id_utilisateur])
+  restaurant     Restaurant  @relation(fields: [id_restaurant], references: [id_restaurant])
+
+  @@id([id_utilisateur, id_restaurant]) // Clé primaire composite
+}
+
+model DetailCommande {
+  id_detail_commande Int @id @default(autoincrement())
+  quantite           Int
+  prix_unitaire      Float // Prix au moment de l'achat
+
+  id_commande Int
+  id_produit  Int
+  commande    Commande    @relation(fields: [id_commande], references: [id_commande])
+  produit     Produit     @relation(fields: [id_produit], references: [id_produit])
+
+  @@index([id_commande])
+  @@index([id_produit])
+}
