@@ -163,3 +163,91 @@ ipcMain.handle('user:getCommandes', async (event, userId) => {
     return [];
   }
 });
+
+// --- Admin endpoints ---
+ipcMain.handle('admin:getRoles', async () => {
+  try {
+    const roles = await prisma.role.findMany({ orderBy: { id_role: 'asc' } });
+    return roles.map(r => ({ id: r.id_role, nom: r.nom_role }));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+});
+
+ipcMain.handle('admin:getUsers', async () => {
+  try {
+    const users = await prisma.utilisateur.findMany({ include: { roles: true } });
+    return users.map(u => ({ id: u.id_utilisateur, nom: u.nom, prenom: u.prenom, email: u.email, roles: (u.roles||[]).map(r=>r.nom_role)}));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+});
+
+ipcMain.handle('admin:setRoles', async (event, userId, roleNames) => {
+  try {
+    // roleNames : array of role name strings to assign
+    const roles = await prisma.role.findMany({ where: { nom_role: { in: roleNames } } });
+    const roleConnect = roles.map(r => ({ id_role: r.id_role }));
+
+    await prisma.utilisateur.update({
+      where: { id_utilisateur: Number(userId) },
+      data: {
+        roles: {
+          set: [],
+          connect: roleConnect,
+        }
+      }
+    });
+    return { success: true };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: err.message };
+  }
+});
+
+// --- Cuisinier (cook) endpoints ---
+ipcMain.handle('cook:getRestaurants', async (event, userId) => {
+  try {
+    // return restaurants where the user is staff
+    const restos = await prisma.restaurant.findMany({
+      where: { staff: { some: { id_utilisateur: Number(userId) } } }
+    });
+    return restos.map(r => ({ id: r.id_restaurant, nom: r.nom, adresse: r.adresse, telephone: r.telephone }));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+});
+
+ipcMain.handle('cook:updateRestaurant', async (event, restaurantId, data) => {
+  try {
+    const updated = await prisma.restaurant.update({ where: { id_restaurant: Number(restaurantId) }, data });
+    return { success: true, restaurant: { id: updated.id_restaurant, nom: updated.nom } };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: err.message };
+  }
+});
+
+// --- Livreur endpoints ---
+ipcMain.handle('livreur:getDeliveries', async (event, userId) => {
+  try {
+    const livraisons = await prisma.livraison.findMany({ where: { id_livreur: Number(userId) }, include: { commande: true } });
+    return livraisons.map(l => ({ id: l.id_livraison, statut: l.statut_livraison, commandeId: l.id_commande }));
+  } catch (err) {
+    console.error(err);
+    return [];
+  }
+});
+
+ipcMain.handle('livreur:updateLivraisonStatus', async (event, livraisonId, statut) => {
+  try {
+    const updated = await prisma.livraison.update({ where: { id_livraison: Number(livraisonId) }, data: { statut_livraison: statut } });
+    return { success: true, livraison: { id: updated.id_livraison, statut: updated.statut_livraison } };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: err.message };
+  }
+});

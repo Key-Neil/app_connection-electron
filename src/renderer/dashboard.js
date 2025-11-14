@@ -38,4 +38,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     sessionStorage.removeItem('currentUser');
     window.location.href = 'index.html';
   });
+
+  // Affiche liens selon rôles
+  const linksDiv = document.getElementById('role-links');
+  const roles = user.roles || [];
+  const links = [];
+  if (roles.includes('Admin')) links.push('<a href="admin.html">Administration</a>');
+  if (roles.includes('Cuisinier') || roles.includes('Restaurant')) links.push('<a href="cook.html">Interface Cuisinier</a>');
+  if (roles.includes('Livreur')) links.push('<a href="livreur.html">Interface Livreur</a>');
+  if (links.length) linksDiv.innerHTML = links.join(' &nbsp; | &nbsp; ');
 });

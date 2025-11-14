@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('Seeding roles...');
 
-  const roles = ['Client', 'Livreur', 'Restaurant', 'Admin'];
+  const roles = ['Client', 'Livreur', 'Restaurant', 'Cuisinier', 'Admin'];
 
   for (const nom_role of roles) {
     await prisma.role.upsert({
