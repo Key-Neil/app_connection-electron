@@ -46,7 +46,11 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage(loginMessage, result.message, result.success);
 
       if (result.success) {
-        loginForm.style.display = 'none';
+        // Stocker l'utilisateur courant et rediriger vers le dashboard
+        if (result.user) {
+          sessionStorage.setItem('currentUser', JSON.stringify(result.user));
+        }
+        window.location.href = 'dashboard.html';
       }
     });
   }

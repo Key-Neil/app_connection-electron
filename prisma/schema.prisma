@@ -104,7 +104,7 @@ model DetailCommande {
 
 model Livraison {
   id_livraison            Int       @id @default(autoincrement())
-  statut_livraison        String    @default("En attente assignation")
+  statut_livraison        String    @default("En attente assignation") @db.VarChar(50)
   note_livraison          String?
   heure_acceptation       DateTime?
   heure_recuperation      DateTime?

@@ -82,6 +82,7 @@ ipcMain.handle('auth:login', async (event, data) => {
   try {
     const user = await prisma.utilisateur.findUnique({
       where: { email: email },
+      include: { roles: true },
     });
 
     if (!user) {
@@ -94,9 +95,71 @@ ipcMain.handle('auth:login', async (event, data) => {
       return { success: false, message: 'Email ou mot de passe incorrect.' };
     }
 
-    return { success: true, message: `Bienvenue, ${user.prenom} !` };
+    // Préparer un objet user sûr à renvoyer au renderer (sans mot_de_passe_hash)
+    const safeUser = {
+      id: user.id_utilisateur,
+      prenom: user.prenom,
+      email: user.email,
+      roles: (user.roles || []).map(r => r.nom_role),
+    };
+
+    return { success: true, message: `Bienvenue, ${user.prenom} !`, user: safeUser };
   } catch (error) {
     console.error(error);
     return { success: false, message: 'Erreur lors de la connexion.' };
+  }
+});
+
+// Récupère le profil utilisateur minimal
+ipcMain.handle('user:getProfile', async (event, userId) => {
+  try {
+    const user = await prisma.utilisateur.findUnique({
+      where: { id_utilisateur: Number(userId) },
+      include: { roles: true },
+      select: {
+        id_utilisateur: true,
+        prenom: true,
+        email: true,
+        roles: true,
+      }
+    });
+    if (!user) return null;
+    return {
+      id: user.id_utilisateur,
+      prenom: user.prenom,
+      email: user.email,
+      roles: (user.roles || []).map(r => r.nom_role),
+    };
+  } catch (err) {
+    console.error(err);
+    return null;
+  }
+});
+
+// Récupère les commandes du client
+ipcMain.handle('user:getCommandes', async (event, userId) => {
+  try {
+    const commandes = await prisma.commande.findMany({
+      where: { id_client: Number(userId) },
+      include: {
+        restaurant: true,
+        details_commande: { include: { produit: true } },
+        livraison: true,
+      },
+      orderBy: { date_commande: 'desc' }
+    });
+
+    // Mapper pour renvoyer une structure simple
+    return commandes.map(c => ({
+      id: c.id_commande,
+      date: c.date_commande,
+      statut: c.statut,
+      restaurant: c.restaurant ? { id: c.restaurant.id_restaurant, nom: c.restaurant.nom } : null,
+      details: (c.details_commande || []).map(d => ({ produit: d.produit ? { id: d.produit.id_produit, nom: d.produit.nom } : null, quantite: d.quantite, prix_unitaire: d.prix_unitaire })),
+      livraison: c.livraison ? { id: c.livraison.id_livraison, statut: c.livraison.statut_livraison } : null,
+    }));
+  } catch (err) {
+    console.error(err);
+    return [];
   }
 });

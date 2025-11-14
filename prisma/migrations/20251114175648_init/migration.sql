@@ -71,7 +71,7 @@ CREATE TABLE `detail_commande` (
 
 CREATE TABLE `livraison` (
     `id_livraison` INTEGER NOT NULL AUTO_INCREMENT,
-    `statut_livraison` VARCHAR(20) NOT NULL DEFAULT 'En attente assignation',
+    `statut_livraison` VARCHAR(50) NOT NULL DEFAULT 'En attente assignation',
     `note_livraison` VARCHAR(100) NULL,
     `heure_acceptation` DATETIME(3) NULL,
     `heure_recuperation` DATETIME(3) NULL,
