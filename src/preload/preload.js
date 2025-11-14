@@ -1,0 +1,6 @@
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('auth', {
+  register: (data) => ipcRenderer.invoke('auth:register', data),
+  login: (data) => ipcRenderer.invoke('auth:login', data),
+});

@@ -64,6 +64,3 @@ coverage/
 
 # Ignore local IDE history (optional)
 .history/
-
-# Keep Prisma migrations committed — do NOT ignore prisma/migrations/
-# If you want to ignore generated SQL migration files, adjust accordingly.

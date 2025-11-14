@@ -1,9 +1,10 @@
-
+// src/main/main.js - Processus principal déplacé sous src/main
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
+// Initialise la connexion à la base de données via Prisma
 const prisma = new PrismaClient();
 
 function createWindow() {
@@ -11,13 +12,15 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      // Préload est maintenant dans src/preload/preload.js
+      preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
-  win.loadFile('index.html');
+  // Charge la page index depuis src/renderer
+  win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 }
 
 app.whenReady().then(() => {
@@ -36,7 +39,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-
+// --- API SÉCURISÉE (Logique Métier) ---
 ipcMain.handle('auth:register', async (event, data) => {
   const { nom, prenom, email, mot_de_passe } = data;
 
@@ -60,18 +63,17 @@ ipcMain.handle('auth:register', async (event, data) => {
         mot_de_passe_hash: mot_de_passe_hash,
       },
     });
-    
+
     await prisma.utilisateur.update({
       where: { id_utilisateur: newUser.id_utilisateur },
       data: {
         roles: {
-          connect: { id_role: 1 }
-        }
-      }
+          connect: { id_role: 1 },
+        },
+      },
     });
 
     return { success: true, message: 'Compte créé avec succès !' };
-
   } catch (error) {
     console.error(error);
     return { success: false, message: 'Erreur lors de la création du compte.' };
@@ -97,7 +99,6 @@ ipcMain.handle('auth:login', async (event, data) => {
     }
 
     return { success: true, message: `Bienvenue, ${user.prenom} !` };
-
   } catch (error) {
     console.error(error);
     return { success: false, message: 'Erreur lors de la connexion.' };
