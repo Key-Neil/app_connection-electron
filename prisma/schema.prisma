@@ -1,0 +1,120 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Utilisateur {
+  id_utilisateur      Int      @id @default(autoincrement())
+  nom                 String
+  prenom              String
+  email               String   @unique
+  mot_de_passe_hash   String
+  telephone           String?  @unique
+  adresse_livraison_default String?
+  disponibilite       String?
+  position_lat        Float?
+  position_lon        Float?
+
+  roles           Role[]     @relation("EffectuerRole")
+  comptes_commandes Commande[] @relation("ClientCommandes")
+  livraisons      Livraison[]
+  restaurants_staff Restaurant[] @relation("RestaurantStaff")
+
+  @@map("utilisateur")
+}
+
+model Role {
+  id_role   Int    @id @default(autoincrement())
+  nom_role  String @unique
+
+  utilisateurs Utilisateur[] @relation("EffectuerRole")
+
+  @@map("role")
+}
+
+model Restaurant {
+  id_restaurant Int    @id @default(autoincrement())
+  nom           String
+  adresse       String?
+  telephone     String?
+  latitude      Float?
+  longitude     Float?
+
+  produits  Produit[]
+  commandes Commande[]
+  staff     Utilisateur[] @relation("RestaurantStaff")
+
+  @@map("restaurant")
+}
+
+model Produit {
+  id_produit    Int     @id @default(autoincrement())
+  nom           String
+  prix          Float
+  description   String?
+  url_photo     String?
+  prix_promo    Float?
+
+  id_restaurant Int
+  restaurant    Restaurant @relation(fields: [id_restaurant], references: [id_restaurant])
+
+  details_commande DetailCommande[] @relation("ProduitDetails")
+
+  @@map("produit")
+}
+
+model Commande {
+  id_commande             Int       @id @default(autoincrement())
+  date_commande           DateTime  @default(now())
+  statut                  String
+  type_livraison          String?
+  temps_preparation_estime_min Int?
+  frais_livraison         Float?    @default(0)
+
+  id_client     Int
+  client        Utilisateur @relation("ClientCommandes", fields: [id_client], references: [id_utilisateur])
+
+  id_restaurant Int
+  restaurant    Restaurant  @relation(fields: [id_restaurant], references: [id_restaurant])
+
+  livraison Livraison?
+
+  details_commande DetailCommande[] @relation("CommandeDetails")
+
+  @@map("commande")
+}
+
+model DetailCommande {
+  id_detail_commande Int   @id @default(autoincrement())
+  quantite           Int
+  prix_unitaire      Float
+
+  id_commande Int
+  commande    Commande @relation("CommandeDetails", fields: [id_commande], references: [id_commande])
+
+  id_produit  Int
+  produit     Produit  @relation("ProduitDetails", fields: [id_produit], references: [id_produit])
+
+  @@map("detail_commande")
+}
+
+model Livraison {
+  id_livraison            Int       @id @default(autoincrement())
+  statut_livraison        String    @default("En attente assignation")
+  note_livraison          String?
+  heure_acceptation       DateTime?
+  heure_recuperation      DateTime?
+  heure_livraison_effective DateTime?
+
+  id_commande Int      @unique
+  commande    Commande @relation(fields: [id_commande], references: [id_commande])
+
+  id_livreur  Int?
+  livreur     Utilisateur? @relation(fields: [id_livreur], references: [id_utilisateur])
+
+  @@map("livraison")
+}

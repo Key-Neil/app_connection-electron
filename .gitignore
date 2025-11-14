@@ -1,0 +1,69 @@
+# Node modules
+node_modules/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+logs/
+*.log
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache
+.npm/
+
+# dotenv environment variables
+.env
+.env.*
+.env.local
+.env.production
+
+# Prisma client / engines
+node_modules/.prisma/
+.prisma/
+
+# Build output
+dist/
+out/
+build/
+release/
+*.exe
+*.app
+*.msi
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Coverage
+coverage/
+
+# Temporary
+.cache/
+.tmp/
+
+# Misc
+*.tgz
+*.zip
+
+# Ignore local IDE history (optional)
+.history/
+
+# Keep Prisma migrations committed — do NOT ignore prisma/migrations/
+# If you want to ignore generated SQL migration files, adjust accordingly.
