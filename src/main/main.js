@@ -1,10 +1,9 @@
-// src/main/main.js - Processus principal déplacé sous src/main
+
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
 
-// Initialise la connexion à la base de données via Prisma
 const prisma = new PrismaClient();
 
 function createWindow() {
@@ -12,14 +11,12 @@ function createWindow() {
     width: 800,
     height: 600,
     webPreferences: {
-      // Préload est maintenant dans src/preload/preload.js
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
     },
   });
 
-  // Charge la page index depuis src/renderer
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
 }
 
@@ -39,7 +36,6 @@ app.on('window-all-closed', () => {
   }
 });
 
-// --- API SÉCURISÉE (Logique Métier) ---
 ipcMain.handle('auth:register', async (event, data) => {
   const { nom, prenom, email, mot_de_passe } = data;
 
