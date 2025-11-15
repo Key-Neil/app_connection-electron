@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.addEventListener('click', async (e)=>{
         const id = e.target.dataset.id;
         const statut = livDiv.querySelector(`select.status-select[data-id="${id}"]`).value;
-        const res = await window.api.updateLivraisonStatus(id, statut);
+        const res = await window.api.updateLivraisonStatus(user.id, id, statut);
         if (res && res.success) alert('Statut mis à jour'); else alert('Erreur');
       });
     });

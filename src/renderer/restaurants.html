@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Restaurants</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <nav id="main-menu"></nav>
+  <div class="container" style="max-width:700px;">
+    <h2>Restaurants</h2>
+    <div id="restaurants-controls" style="margin-bottom:1rem;">
+      <label for="restaurant-select">Choisir un restaurant :</label>
+      <select id="restaurant-select" style="width:100%; padding:0.5rem; margin-top:0.5rem;"></select>
+    </div>
+    <div id="restaurant-detail">Chargement...</div>
+    <div id="cart-container" style="margin-top:1rem;"></div>
+  </div>
+  <script src="./menu.js" defer></script>
+  <script src="./restaurants.js" defer></script>
+</body>
+</html>

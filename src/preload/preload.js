@@ -15,7 +15,22 @@ contextBridge.exposeInMainWorld('api', {
   // Cook
   getRestaurantsForCook: (userId) => ipcRenderer.invoke('cook:getRestaurants', userId),
   updateRestaurant: (restaurantId, data) => ipcRenderer.invoke('cook:updateRestaurant', restaurantId, data),
+  // Cook orders
+  getCommandesForCook: (userId) => ipcRenderer.invoke('cook:getCommandes', userId),
+  updateCommandeStatus: (userId, commandeId, statut) => ipcRenderer.invoke('cook:updateCommandeStatus', userId, commandeId, statut),
   // Livreur
   getDeliveriesForLivreur: (userId) => ipcRenderer.invoke('livreur:getDeliveries', userId),
-  updateLivraisonStatus: (livraisonId, statut) => ipcRenderer.invoke('livreur:updateLivraisonStatus', livraisonId, statut),
+  updateLivraisonStatus: (userId, livraisonId, statut) => ipcRenderer.invoke('livreur:updateLivraisonStatus', userId, livraisonId, statut),
+  // Livreur: available commandes + assign
+  getAvailableCommandes: () => ipcRenderer.invoke('livreur:getAvailableCommandes'),
+  createLivraison: (userId, commandeId) => ipcRenderer.invoke('livreur:createLivraison', userId, commandeId),
+  // Restaurants (client + admin/cuisinier)
+  getAllRestaurants: () => ipcRenderer.invoke('restaurant:getAll'),
+  addRestaurant: (userId, data) => ipcRenderer.invoke('restaurant:add', userId, data),
+  deleteRestaurant: (userId, id) => ipcRenderer.invoke('restaurant:delete', userId, id),
+  addProduit: (userId, restaurantId, produit) => ipcRenderer.invoke('restaurant:addProduit', userId, restaurantId, produit),
+  updateProduit: (userId, produitId, data) => ipcRenderer.invoke('restaurant:updateProduit', userId, produitId, data),
+  deleteProduit: (userId, produitId) => ipcRenderer.invoke('restaurant:deleteProduit', userId, produitId),
+  // Commande
+  createCommande: (userId, payload) => ipcRenderer.invoke('commande:create', userId, payload),
 });
