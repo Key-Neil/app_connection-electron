@@ -52,7 +52,17 @@ function renderMenu() {
   if (user && document.getElementById('menu-logout')) {
     document.getElementById('menu-logout').addEventListener('click', (e) => {
       e.preventDefault();
+      // Utiliser la fonction utilitaire pour nettoyer la session et enlever overlays
+      try {
+        if (typeof clearSession === 'function') {
+          clearSession();
+          return;
+        }
+      } catch (err) {
+        console.debug('clearSession not available, fallback logout', err);
+      }
       sessionStorage.removeItem('currentUser');
+      document.body.style.pointerEvents = 'auto';
       window.location.href = 'index.html';
     });
   }

@@ -110,6 +110,9 @@ h3 {
 	background: rgba(255,255,255,0.95);
 	padding: 3rem 2.5rem;
 	border-radius: var(--radius);
+	/* S'assurer que le container soit au-dessus des éventuels éléments d'arrière-plan */
+	position: relative;
+	z-index: 10;
 	box-shadow: var(--shadow-lg);
 	width: 96%;
 	max-width: 700px;

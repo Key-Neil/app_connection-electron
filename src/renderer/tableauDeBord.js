@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   document.getElementById('logout').addEventListener('click', () => {
+    try {
+      if (typeof clearSession === 'function') { clearSession(); return; }
+    } catch (e) { /* fallback */ }
     sessionStorage.removeItem('currentUser');
+    document.body.style.pointerEvents = 'auto';
     window.location.href = 'index.html';
   });
 

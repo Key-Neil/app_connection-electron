@@ -27,6 +27,14 @@ function setCurrentUser(user) {
  */
 function clearSession() {
   sessionStorage.removeItem('currentUser');
+  // Retirer d'éventuelles overlays/modal qui pourraient bloquer les clics
+  try {
+    document.querySelectorAll('.modal-backdrop, #global-overlay, .overlay, .backdrop').forEach(el => el.remove());
+    // Réactiver les interactions sur le body au cas où elles seraient désactivées
+    document.body.style.pointerEvents = 'auto';
+  } catch (e) {
+    console.debug('clearSession cleanup:', e);
+  }
   window.location.href = 'index.html';
 }
 
