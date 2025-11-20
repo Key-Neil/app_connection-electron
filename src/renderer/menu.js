@@ -1,32 +1,54 @@
-// Barre de menu dynamique selon les rôles
+// ============ BARRE DE MENU DYNAMIQUE ============
+
+/**
+ * Génère la barre de menu en fonction des rôles de l'utilisateur
+ */
 function renderMenu() {
   const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
   const nav = document.getElementById('main-menu');
   if (!nav) return;
+
+  // Construire les liens en fonction de l'authentification et des rôles
   let links = [];
+
   if (!user) {
+    // Utilisateur non connecté
     links = [
       { href: 'index.html', label: 'Connexion' },
       { href: 'register.html', label: 'Inscription' }
     ];
   } else {
-    links.push({ href: 'dashboard.html', label: 'Tableau de bord' });
-    if ((user.roles||[]).includes('Client'))
+    // Utilisateur connecté
+    links.push({ href: 'tableauDeBord.html', label: 'Tableau de bord' });
+
+    // Lien client
+    if ((user.roles || []).includes('Client'))
       links.push({ href: 'restaurants.html', label: 'Restaurants' });
-    if ((user.roles||[]).includes('Admin'))
+
+    // Lien admin
+    if ((user.roles || []).includes('Admin'))
       links.push({ href: 'admin.html', label: 'Administration' });
-    if ((user.roles||[]).includes('Cuisinier') || (user.roles||[]).includes('Restaurant')) {
-      links.push({ href: 'cook.html', label: 'Cuisinier' });
-      links.push({ href: 'cook-orders.html', label: 'Commandes à préparer' });
+
+    // Liens cuisinier
+    if ((user.roles || []).includes('Cuisinier') || (user.roles || []).includes('Restaurant')) {
+      links.push({ href: 'cuisinier.html', label: 'Cuisinier' });
+      links.push({ href: 'commandes-cuisinier.html', label: 'Commandes à préparer' });
     }
-    if ((user.roles||[]).includes('Livreur')) {
+
+    // Liens livreur
+    if ((user.roles || []).includes('Livreur')) {
       links.push({ href: 'livreur.html', label: 'Livreur' });
-      links.push({ href: 'livreur-orders.html', label: 'Mes livraisons' });
+      links.push({ href: 'livraisons.html', label: 'Mes livraisons' });
     }
+
+    // Bouton déconnexion
     links.push({ href: '#', label: 'Déconnexion', id: 'menu-logout' });
   }
-  nav.innerHTML = links.map(l => `<a href="${l.href}"${l.id?` id='${l.id}'`:''}>${l.label}</a>`).join(' | ');
-  // Déconnexion
+
+  // Générer le HTML du menu
+  nav.innerHTML = links.map(l => `<a href="${l.href}"${l.id ? ` id='${l.id}'` : ''}>${l.label}</a>`).join(' | ');
+
+  // Attacher l'événement de déconnexion
   if (user && document.getElementById('menu-logout')) {
     document.getElementById('menu-logout').addEventListener('click', (e) => {
       e.preventDefault();
@@ -36,4 +58,5 @@ function renderMenu() {
   }
 }
 
+// Rendre le menu lors du chargement de la page
 document.addEventListener('DOMContentLoaded', renderMenu);
