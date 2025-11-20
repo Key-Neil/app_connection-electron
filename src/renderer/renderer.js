@@ -57,9 +57,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showMessage(loginMessage, result.message, result.success ? 'success' : 'error');
 
       if (result.success) {
-        // Enregistrer l'utilisateur en session
+        // Enregistrer l'utilisateur en session via utils.js
         if (result.user) {
-          sessionStorage.setItem('currentUser', JSON.stringify(result.user));
+          setCurrentUser(result.user);
         }
         // Rediriger vers le tableau de bord
         window.location.href = 'tableauDeBord.html';
