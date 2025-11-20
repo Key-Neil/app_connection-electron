@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await window.auth.register(data);
 
       // Afficher le message de résultat
-      showMessage(registerMessage, result.message, result.success);
+      showMessage(registerMessage, result.message, result.success ? 'success' : 'error');
 
       if (result.success) {
         registerForm.reset();
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const result = await window.auth.login(data);
 
       // Afficher le message de résultat
-      showMessage(loginMessage, result.message, result.success);
+      showMessage(loginMessage, result.message, result.success ? 'success' : 'error');
 
       if (result.success) {
         // Enregistrer l'utilisateur en session
@@ -65,18 +65,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'tableauDeBord.html';
       }
     });
-  }
-
-  /**
-   * Affiche un message avec style
-   * @param {HTMLElement} element - Élément contenant le message
-   * @param {string} message - Texte du message
-   * @param {boolean} isSuccess - Si c'est un succès ou une erreur
-   */
-  function showMessage(element, message, isSuccess) {
-    if (!element) return;
-    element.textContent = message;
-    element.className = isSuccess ? 'message success' : 'message error';
-    element.style.display = 'block';
   }
 });

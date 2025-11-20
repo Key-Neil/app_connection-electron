@@ -34,9 +34,12 @@ contextBridge.exposeInMainWorld('api', {
   getAllRestaurants: () => ipcRenderer.invoke('restaurant:getAll'),
   addRestaurant: (userId, data) => ipcRenderer.invoke('restaurant:add', userId, data),
   deleteRestaurant: (userId, id) => ipcRenderer.invoke('restaurant:delete', userId, id),
-  addProduit: (userId, restaurantId, produit) => ipcRenderer.invoke('restaurant:addProduit', userId, restaurantId, produit),
+  addProduit: (userId, sectionId, produit) => ipcRenderer.invoke('restaurant:addProduit', userId, sectionId, produit),
   updateProduit: (userId, produitId, data) => ipcRenderer.invoke('restaurant:updateProduit', userId, produitId, data),
   deleteProduit: (userId, produitId) => ipcRenderer.invoke('restaurant:deleteProduit', userId, produitId),
+  addSection: (userId, restaurantId, data) => ipcRenderer.invoke('restaurant:addSection', userId, restaurantId, data),
+  updateSection: (userId, sectionId, data) => ipcRenderer.invoke('restaurant:updateSection', userId, sectionId, data),
+  deleteSection: (userId, sectionId) => ipcRenderer.invoke('restaurant:deleteSection', userId, sectionId),
 
   // ========== COMMANDES ==========
   createCommande: (userId, payload) => ipcRenderer.invoke('commande:create', userId, payload),

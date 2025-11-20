@@ -44,11 +44,26 @@ model Restaurant {
   latitude      Float?
   longitude     Float?
 
-  produits  Produit[]
-  commandes Commande[]
-  staff     Utilisateur[] @relation("RestaurantStaff")
+  produits      Produit[]
+  sections      SectionMenu[]
+  commandes     Commande[]
+  staff         Utilisateur[] @relation("RestaurantStaff")
 
   @@map("restaurant")
+}
+
+model SectionMenu {
+  id_section    Int       @id @default(autoincrement())
+  nom           String
+  description   String?
+  ordre         Int       @default(0)
+
+  id_restaurant Int
+  restaurant    Restaurant @relation(fields: [id_restaurant], references: [id_restaurant])
+
+  produits      Produit[]
+
+  @@map("section_menu")
 }
 
 model Produit {
@@ -61,6 +76,9 @@ model Produit {
 
   id_restaurant Int
   restaurant    Restaurant @relation(fields: [id_restaurant], references: [id_restaurant])
+
+  id_section    Int
+  section       SectionMenu @relation(fields: [id_section], references: [id_section])
 
   details_commande DetailCommande[] @relation("ProduitDetails")
 

@@ -75,6 +75,18 @@ ipcMain.handle('restaurant:deleteProduit', async (event, userId, produitId) =>
   restaurantController.deleteProduit(userId, produitId)
 );
 
+ipcMain.handle('restaurant:addSection', async (event, userId, restaurantId, data) =>
+  restaurantController.addSection(userId, restaurantId, data)
+);
+
+ipcMain.handle('restaurant:updateSection', async (event, userId, sectionId, data) =>
+  restaurantController.updateSection(userId, sectionId, data)
+);
+
+ipcMain.handle('restaurant:deleteSection', async (event, userId, sectionId) =>
+  restaurantController.deleteSection(userId, sectionId)
+);
+
 // ============ HANDLERS IPC : COMMANDES ============
 ipcMain.handle('commande:create', async (event, userId, payload) =>
   commandeController.createCommande(userId, payload)
