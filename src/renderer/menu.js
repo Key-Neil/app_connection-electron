@@ -4,7 +4,7 @@
  * Génère la barre de menu en fonction des rôles de l'utilisateur
  */
 function renderMenu() {
-  const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const user = getCurrentUser();
   const nav = document.getElementById('main-menu');
   if (!nav) return;
 

@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = JSON.parse(sessionStorage.getItem('currentUser')||'null');
+  const user = getCurrentUser();
   if (!user) { window.location.href='index.html'; return; }
   const listDiv = document.getElementById('livraisons-list');
-  listDiv.innerText = 'Chargement...';
+  listDiv.innerText = 'Chargement des livraisons...';
   try {
     // Afficher deux sections : commandes disponibles et mes livraisons
+    console.log('Chargement des livraisons...');
     const [available, livraisons] = await Promise.all([window.api.getAvailableCommandes(), window.api.getDeliveriesForLivreur(user.id)]);
+    console.log('Commandes disponibles:', available);
+    console.log('Mes livraisons:', livraisons);
     listDiv.innerHTML = '';
     const availDiv = document.createElement('div'); availDiv.innerHTML = '<h3>Commandes disponibles</h3>';
     if (!available || available.length===0) { availDiv.innerHTML += '<div>Aucune commande prête disponible.</div>'; }
@@ -35,5 +38,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res && res.success) alert('Statut mis à jour'); else alert('Erreur: '+(res && res.error?res.error:''));
       });
     });
-  } catch (err) { listDiv.innerText = 'Erreur.'; }
+  } catch (err) { 
+    console.error('Erreur livraisons:', err);
+    listDiv.innerHTML = `
+      <div style="color: #d32f2f; padding: 1.5rem; background: #ffebee; border-radius: 8px; border-left: 4px solid #d32f2f;">
+        <strong>Erreur lors du chargement des livraisons</strong><br>
+        <small>${err.message || 'Une erreur est survenue'}</small><br>
+        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Réessayer</button>
+      </div>
+    `;
+  }
 });

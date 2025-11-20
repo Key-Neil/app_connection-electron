@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = JSON.parse(sessionStorage.getItem('currentUser') || 'null');
+  const user = getCurrentUser();
   if (!user) {
     window.location.href = 'index.html';
     return;
@@ -13,8 +13,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const commandes = await window.api.getCommandes(user.id);
+    console.log('Commandes reçues:', commandes);
+    
     if (!commandes || commandes.length === 0) {
-      commandesContainer.innerText = 'Aucune commande.';
+      commandesContainer.innerHTML = `
+        <div style="text-align: center; padding: 2rem;">
+          <p style="color: #666; font-size: 1.1rem;">Aucune commande pour le moment.</p>
+          <p style="color: #999;">Commencez à commander pour voir vos commandes ici.</p>
+          <a href="restaurants.html" style="display: inline-block; margin-top: 1rem; padding: 0.75rem 1.5rem; background: #007aff; color: white; text-decoration: none; border-radius: 8px; font-weight: 500;">Commander maintenant</a>
+        </div>
+      `;
     } else {
       const ul = document.createElement('div');
       ul.innerHTML = commandes.map(c => {
@@ -30,8 +38,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       commandesContainer.innerHTML = ul.innerHTML;
     }
   } catch (err) {
-    console.error(err);
-    commandesContainer.innerText = 'Erreur lors du chargement des commandes.';
+    console.error('Erreur getCommandes:', err);
+    commandesContainer.innerHTML = `
+      <div style="color: #d32f2f; padding: 1.5rem; background: #ffebee; border-radius: 8px; border-left: 4px solid #d32f2f;">
+        <strong>Erreur lors du chargement des commandes</strong><br>
+        <small>${err.message || 'Une erreur est survenue'}</small><br>
+        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Réessayer</button>
+      </div>
+    `;
   }
 
   document.getElementById('logout').addEventListener('click', () => {

@@ -108,9 +108,11 @@ ipcMain.handle('cook:updateCommandeStatus', async (event, userId, commandeId, st
 ipcMain.handle('cook:getRestaurants', async (event, userId) => {
   const prisma = getPrismaClient();
   try {
+    console.log('📚 [cook:getRestaurants] Recherche restaurants pour userId:', userId);
     const restos = await prisma.restaurant.findMany({
       where: { staff: { some: { id_utilisateur: Number(userId) } } },
     });
+    console.log('📚 [cook:getRestaurants] Restaurants trouvés:', restos.length, restos);
     return restos.map(r => ({
       id: r.id_restaurant,
       nom: r.nom,
@@ -118,7 +120,7 @@ ipcMain.handle('cook:getRestaurants', async (event, userId) => {
       telephone: r.telephone,
     }));
   } catch (err) {
-    console.error('Erreur lors de la récupération des restaurants:', err);
+    console.error('❌ [cook:getRestaurants] Erreur:', err);
     return [];
   }
 });

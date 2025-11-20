@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = JSON.parse(sessionStorage.getItem('currentUser')||'null');
+  const user = getCurrentUser();
   if (!user) { window.location.href='index.html'; return; }
   
   const selectEl = document.getElementById('restaurant-select');

@@ -1,10 +1,12 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  const user = JSON.parse(sessionStorage.getItem('currentUser')||'null');
+  const user = getCurrentUser();
   if (!user) { window.location.href='index.html'; return; }
   const listDiv = document.getElementById('orders-list');
-  listDiv.innerText = 'Chargement...';
+  listDiv.innerText = 'Chargement des commandes...';
   try {
+    console.log('Chargement des commandes pour le cuisinier...');
     const commandes = await window.api.getCommandesForCook(user.id);
+    console.log('Commandes reçues:', commandes);
     if (!commandes || commandes.length === 0) { listDiv.innerText = 'Aucune commande à préparer.'; return; }
     listDiv.innerHTML = commandes.map(c => `
       <div style="border:1px solid #eee;padding:1rem;margin-bottom:1rem;border-radius:8px">
@@ -27,5 +29,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (res && res.success) alert('Statut mis à jour'); else alert('Erreur: '+(res && res.error?res.error:''));
       });
     });
-  } catch (err) { listDiv.innerText = 'Erreur.'; }
+  } catch (err) { 
+    console.error('Erreur getCommandesForCook:', err);
+    listDiv.innerHTML = `
+      <div style="color: #d32f2f; padding: 1.5rem; background: #ffebee; border-radius: 8px; border-left: 4px solid #d32f2f;">
+        <strong>Erreur lors du chargement des commandes</strong><br>
+        <small>${err.message || 'Une erreur est survenue'}</small><br>
+        <button onclick="location.reload()" style="margin-top: 1rem; padding: 0.5rem 1rem; background: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer;">Réessayer</button>
+      </div>
+    `;
+  }
 });
