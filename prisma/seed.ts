@@ -1,12 +1,29 @@
-const { PrismaClient } = require('@prisma/client');
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcryptjs';
+
 const prisma = new PrismaClient();
 
-const bcrypt = require('bcryptjs');
+interface RestaurantData {
+  nom: string;
+  adresse: string;
+  telephone: string;
+  latitude: number;
+  longitude: number;
+  produits: {
+    create: Array<{
+      nom: string;
+      prix: number;
+      description: string;
+      url_photo: null;
+      prix_promo: null;
+    }>;
+  };
+}
 
-async function main() {
+async function main(): Promise<void> {
   console.log('Seeding roles...');
 
-  const roles = ['Client', 'Livreur', 'Restaurant', 'Cuisinier', 'Admin'];
+  const roles: string[] = ['Client', 'Livreur', 'Restaurant', 'Cuisinier', 'Admin'];
   for (const nom_role of roles) {
     await prisma.role.upsert({
       where: { nom_role },
@@ -15,17 +32,18 @@ async function main() {
     });
   }
 
-  // Créer un utilisateur admin par défaut
   console.log('Seeding default admin user...');
   const adminEmail = 'admin@gmail.com';
   const adminPassword = 'admin';
   const adminHash = await bcrypt.hash(adminPassword, 10);
 
-  // Récupérer le rôle Admin
   const adminRole = await prisma.role.findUnique({ where: { nom_role: 'Admin' } });
 
-  // Upsert admin user
-  const adminUser = await prisma.utilisateur.upsert({
+  if (!adminRole) {
+    throw new Error('Admin role not found');
+  }
+
+  await prisma.utilisateur.upsert({
     where: { email: adminEmail },
     update: {},
     create: {
@@ -44,9 +62,8 @@ async function main() {
     },
   });
 
-  // Créer 3 restaurants par défaut avec menus
   console.log('Seeding default restaurants...');
-  const restaurantsData = [
+  const restaurantsData: RestaurantData[] = [
     {
       nom: 'Le Gourmet',
       adresse: '123 Rue de Paris',
@@ -74,7 +91,7 @@ async function main() {
     },
     {
       nom: 'Pizza Bella',
-      adresse: '45 Avenue d’Italie',
+      adresse: '45 Avenue d'Italie',
       telephone: '0607080910',
       latitude: 48.8301,
       longitude: 2.3556,
@@ -135,7 +152,7 @@ async function main() {
 }
 
 main()
-  .catch((e) => {
+  .catch((e: Error) => {
     console.error(e);
     process.exit(1);
   })

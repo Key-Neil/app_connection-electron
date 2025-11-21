@@ -4,11 +4,13 @@
   "description": "Application de livraison avec Electron et Prisma",
   "main": "dist/main/main.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsx build.ts",
+    "copy-assets": "tsx copy-assets.ts",
     "clean": "rimraf dist",
     "rebuild": "npm run clean && npm run build",
     "start": "npm run build && electron .",
     "dev": "electron .",
+    "seed": "tsx prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -24,6 +26,7 @@
     "@types/node": "^24.10.1",
     "prisma": "^5.17.0",
     "ts-loader": "^9.5.4",
+    "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "prisma": {
