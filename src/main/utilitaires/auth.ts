@@ -37,3 +37,5 @@ module.exports = {
   comparePasswords,
   buildSafeUser,
 };
+
+export {};

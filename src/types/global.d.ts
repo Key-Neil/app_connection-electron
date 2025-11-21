@@ -1,4 +1,25 @@
 declare global {
+  interface HTMLElement {
+    value?: string;
+    checked?: boolean;
+    disabled?: boolean;
+    dataset: DOMStringMap;
+    reset?(): void;
+  }
+
+  interface Element {
+    value?: string;
+    checked?: boolean;
+    disabled?: boolean;
+    dataset: DOMStringMap;
+  }
+
+  interface EventTarget {
+    dataset?: DOMStringMap;
+    value?: string;
+    checked?: boolean;
+  }
+
   interface Window {
     api: {
       getAllRestaurants: () => Promise<any>;
@@ -17,6 +38,12 @@ declare global {
       addProduit: (userId: number, sectionId: number, data: any) => Promise<any>;
       updateProduit: (userId: number, produitId: number, data: any) => Promise<any>;
       deleteProduit: (userId: number, produitId: number) => Promise<any>;
+      getUsers: () => Promise<any[]>;
+      getRoles: () => Promise<any[]>;
+      setRoles: (userId: number, roles: string[]) => Promise<any>;
+      updateCommandeStatus: (commandeId: number, statut: string) => Promise<any>;
+      addRestaurant?: (data: any) => Promise<any>;
+      deleteRestaurant?: (restaurantId: number) => Promise<any>;
     };
     auth: {
       register: (data: any) => Promise<any>;

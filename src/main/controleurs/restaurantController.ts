@@ -200,3 +200,5 @@ async function deleteSection(userId, sectionId) {
     return { success: false, error: err.message };
   }
 }
+
+export {};

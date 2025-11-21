@@ -22,10 +22,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         usersDiv.innerHTML = table.innerHTML;
         usersDiv.querySelectorAll('input[type=checkbox]').forEach(cb => {
             cb.addEventListener('change', async (e) => {
-                const userId = e.target.dataset.user;
+                const userId = (e.target as any).dataset.user;
                 const checkboxes = Array.from(usersDiv.querySelectorAll(`input[data-user="${userId}"]`));
-                const selectedRoles = checkboxes.filter(c => c.checked).map(c => c.dataset.role);
-                const res = await window.api.setRoles(userId, selectedRoles);
+                const selectedRoles = checkboxes.filter(c => (c as any).checked).map(c => (c as any).dataset.role);
+                const res = await window.api.setRoles(Number(userId), selectedRoles as any);
                 if (!res || !res.success)
                     alert('Erreur lors de la mise à jour des rôles');
             });

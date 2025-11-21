@@ -16,3 +16,5 @@ module.exports = {
   getPrismaClient,
   disconnectPrisma,
 };
+
+export {};
