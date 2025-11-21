@@ -1,72 +1,48 @@
-// ============ BARRE DE MENU DYNAMIQUE ============
-
-/**
- * Génère la barre de menu en fonction des rôles de l'utilisateur
- */
 function renderMenu() {
-  const user = getCurrentUser();
-  const nav = document.getElementById('main-menu');
-  if (!nav) return;
-
-  // Construire les liens en fonction de l'authentification et des rôles
-  let links = [];
-
-  if (!user) {
-    // Utilisateur non connecté
-    links = [
-      { href: 'index.html', label: 'Connexion' },
-      { href: 'register.html', label: 'Inscription' }
-    ];
-  } else {
-    // Utilisateur connecté
-    links.push({ href: 'tableauDeBord.html', label: 'Tableau de bord' });
-
-    // Lien client
-    if ((user.roles || []).includes('Client'))
-      links.push({ href: 'restaurants.html', label: 'Restaurants' });
-
-    // Lien admin
-    if ((user.roles || []).includes('Admin'))
-      links.push({ href: 'admin.html', label: 'Administration' });
-
-    // Liens cuisinier
-    if ((user.roles || []).includes('Cuisinier') || (user.roles || []).includes('Restaurant')) {
-      links.push({ href: 'cuisinier.html', label: 'Cuisinier' });
-      links.push({ href: 'commandes-cuisinier.html', label: 'Commandes à préparer' });
+    const user = getCurrentUser();
+    const nav = document.getElementById('main-menu');
+    if (!nav)
+        return;
+    let links = [];
+    if (!user) {
+        links = [
+            { href: 'index.html', label: 'Connexion' },
+            { href: 'register.html', label: 'Inscription' }
+        ];
     }
-
-    // Liens livreur
-    if ((user.roles || []).includes('Livreur')) {
-      links.push({ href: 'livreur.html', label: 'Livreur' });
-      links.push({ href: 'livraisons.html', label: 'Mes livraisons' });
-    }
-
-    // Bouton déconnexion
-    links.push({ href: '#', label: 'Déconnexion', id: 'menu-logout' });
-  }
-
-  // Générer le HTML du menu
-  nav.innerHTML = links.map(l => `<a href="${l.href}"${l.id ? ` id='${l.id}'` : ''}>${l.label}</a>`).join(' | ');
-
-  // Attacher l'événement de déconnexion
-  if (user && document.getElementById('menu-logout')) {
-    document.getElementById('menu-logout').addEventListener('click', (e) => {
-      e.preventDefault();
-      // Utiliser la fonction utilitaire pour nettoyer la session et enlever overlays
-      try {
-        if (typeof clearSession === 'function') {
-          clearSession();
-          return;
+    else {
+        links.push({ href: 'tableauDeBord.html', label: 'Tableau de bord' });
+        if ((user.roles || []).includes('Client'))
+            links.push({ href: 'restaurants.html', label: 'Restaurants' });
+        if ((user.roles || []).includes('Admin'))
+            links.push({ href: 'admin.html', label: 'Administration' });
+        if ((user.roles || []).includes('Cuisinier') || (user.roles || []).includes('Restaurant')) {
+            links.push({ href: 'cuisinier.html', label: 'Cuisinier' });
+            links.push({ href: 'commandes-cuisinier.html', label: 'Commandes à préparer' });
         }
-      } catch (err) {
-        console.debug('clearSession not available, fallback logout', err);
-      }
-      sessionStorage.removeItem('currentUser');
-      document.body.style.pointerEvents = 'auto';
-      window.location.href = 'index.html';
-    });
-  }
+        if ((user.roles || []).includes('Livreur')) {
+            links.push({ href: 'livreur.html', label: 'Livreur' });
+            links.push({ href: 'livraisons.html', label: 'Mes livraisons' });
+        }
+        links.push({ href: '#', label: 'Déconnexion', id: 'menu-logout' });
+    }
+    nav.innerHTML = links.map(l => `<a href="${l.href}"${l.id ? ` id='${l.id}'` : ''}>${l.label}</a>`).join(' | ');
+    if (user && document.getElementById('menu-logout')) {
+        document.getElementById('menu-logout').addEventListener('click', (e) => {
+            e.preventDefault();
+            try {
+                if (typeof clearSession === 'function') {
+                    clearSession();
+                    return;
+                }
+            }
+            catch (err) {
+                console.debug('clearSession not available, fallback logout', err);
+            }
+            sessionStorage.removeItem('currentUser');
+            document.body.style.pointerEvents = 'auto';
+            window.location.href = 'index.html';
+        });
+    }
 }
-
-// Rendre le menu lors du chargement de la page
 document.addEventListener('DOMContentLoaded', renderMenu);

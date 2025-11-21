@@ -16,9 +16,12 @@
     "electron": "^31.2.1"
   },
   "devDependencies": {
-    "prisma": "^5.17.0"
-  }
-  ,
+    "@types/electron": "^1.4.38",
+    "@types/node": "^24.10.1",
+    "prisma": "^5.17.0",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3"
+  },
   "prisma": {
     "seed": "node ./prisma/seed.js"
   }
