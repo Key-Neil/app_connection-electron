@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `).join('\n');
         restosDiv.querySelectorAll('.save-resto').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = e.target.dataset.id;
+                const id = parseInt(e.target.dataset.id);
                 const addr = restosDiv.querySelector(`input.resto-addr[data-id="${id}"]`).value;
                 const tel = restosDiv.querySelector(`input.resto-tel[data-id="${id}"]`).value;
                 const res = await window.api.updateRestaurant(id, { adresse: addr, telephone: tel });

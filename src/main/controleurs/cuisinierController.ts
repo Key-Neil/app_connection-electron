@@ -1,4 +1,3 @@
-
 const { getPrismaClient } = require('../utilitaires/prisma');
 const { userHasAnyRole } = require('../utilitaires/auth');
 const prisma = getPrismaClient();
@@ -96,9 +95,27 @@ async function updateCommandeStatus(userId, commandeId, statut) {
     return { success: false, error: err.message };
   }
 }
+async function getRestaurantsForCook(userId: number) {
+  try {
+    const restaurants = await prisma.restaurant.findMany({
+      where: {
+        staff: {
+          some: {
+            id_utilisateur: Number(userId),
+          },
+        },
+      },
+    });
+    return restaurants;
+  } catch (err) {
+    console.error('Erreur lors de la récupération des restaurants du cuisinier:', err);
+    return [];
+  }
+}
 module.exports = {
   getCommandes,
   updateCommandeStatus,
+  getRestaurantsForCook,
 };
 
 export {};

@@ -9,13 +9,20 @@ interface RestaurantData {
   telephone: string;
   latitude: number;
   longitude: number;
-  produits: {
+  sections: {
     create: Array<{
       nom: string;
-      prix: number;
-      description: string;
-      url_photo: null;
-      prix_promo: null;
+      description?: string | null;
+      ordre?: number;
+      produits?: {
+        create: Array<{
+          nom: string;
+          prix: number;
+          description?: string | null;
+          url_photo?: string | null;
+          prix_promo?: number | null;
+        }>;
+      };
     }>;
   };
 }
@@ -70,46 +77,64 @@ async function main(): Promise<void> {
       telephone: '0102030405',
       latitude: 48.8566,
       longitude: 2.3522,
-      produits: {
+      sections: {
         create: [
           {
-            nom: 'Menu Découverte',
-            prix: 25.0,
-            description: 'Entrée, plat, dessert. Découvrez la cuisine du chef.',
-            url_photo: null,
-            prix_promo: null,
-          },
-          {
-            nom: 'Menu Végétarien',
-            prix: 22.0,
-            description: 'Un menu complet sans viande, plein de saveurs.',
-            url_photo: null,
-            prix_promo: null,
+            nom: 'Menus',
+            description: 'Menus du chef',
+            ordre: 0,
+            produits: {
+              create: [
+                {
+                  nom: 'Menu Découverte',
+                  prix: 25.0,
+                  description: 'Entrée, plat, dessert. Découvrez la cuisine du chef.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+                {
+                  nom: 'Menu Végétarien',
+                  prix: 22.0,
+                  description: 'Un menu complet sans viande, plein de saveurs.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+              ],
+            },
           },
         ],
       },
     },
     {
       nom: 'Pizza Bella',
-      adresse: '45 Avenue d'Italie',
+      adresse: "45 Avenue d'Italie",
       telephone: '0607080910',
       latitude: 48.8301,
       longitude: 2.3556,
-      produits: {
+      sections: {
         create: [
           {
-            nom: 'Menu Pizza Classique',
-            prix: 18.0,
-            description: 'Pizza au choix + boisson + dessert.',
-            url_photo: null,
-            prix_promo: null,
-          },
-          {
-            nom: 'Menu Duo',
-            prix: 32.0,
-            description: '2 pizzas au choix + 2 boissons.',
-            url_photo: null,
-            prix_promo: null,
+            nom: 'Pizzas',
+            description: 'Nos pizzas maison',
+            ordre: 0,
+            produits: {
+              create: [
+                {
+                  nom: 'Menu Pizza Classique',
+                  prix: 18.0,
+                  description: 'Pizza au choix + boisson + dessert.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+                {
+                  nom: 'Menu Duo',
+                  prix: 32.0,
+                  description: '2 pizzas au choix + 2 boissons.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+              ],
+            },
           },
         ],
       },
@@ -120,21 +145,30 @@ async function main(): Promise<void> {
       telephone: '0112233445',
       latitude: 48.8700,
       longitude: 2.3700,
-      produits: {
+      sections: {
         create: [
           {
-            nom: 'Menu Sushi Découverte',
-            prix: 28.0,
-            description: 'Assortiment de sushis, makis et sashimis.',
-            url_photo: null,
-            prix_promo: null,
-          },
-          {
-            nom: 'Menu Bento',
-            prix: 24.0,
-            description: 'Bento complet avec riz, poisson, légumes.',
-            url_photo: null,
-            prix_promo: null,
+            nom: 'Sushis',
+            description: 'Sélection de sushis et makis',
+            ordre: 0,
+            produits: {
+              create: [
+                {
+                  nom: 'Menu Sushi Découverte',
+                  prix: 28.0,
+                  description: 'Assortiment de sushis, makis et sashimis.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+                {
+                  nom: 'Menu Bento',
+                  prix: 24.0,
+                  description: 'Bento complet avec riz, poisson, légumes.',
+                  url_photo: null,
+                  prix_promo: null,
+                },
+              ],
+            },
           },
         ],
       },
@@ -144,7 +178,46 @@ async function main(): Promise<void> {
   for (const resto of restaurantsData) {
     const exists = await prisma.restaurant.findFirst({ where: { nom: resto.nom } });
     if (!exists) {
-      await prisma.restaurant.create({ data: resto });
+      // Create restaurant first
+      const created = await prisma.restaurant.create({
+        data: {
+          nom: resto.nom,
+          adresse: resto.adresse,
+          telephone: resto.telephone,
+          latitude: resto.latitude,
+          longitude: resto.longitude,
+        },
+      });
+
+      // Then create sections and products referencing the created restaurant
+      if (resto.sections && Array.isArray(resto.sections.create)) {
+        for (const sec of resto.sections.create) {
+          const createdSection = await prisma.sectionMenu.create({
+            data: {
+              nom: sec.nom,
+              description: sec.description ?? null,
+              ordre: sec.ordre ?? 0,
+              id_restaurant: created.id_restaurant,
+            },
+          });
+
+          if (sec.produits && Array.isArray(sec.produits.create)) {
+            for (const p of sec.produits.create) {
+              await prisma.produit.create({
+                data: {
+                  nom: p.nom,
+                  prix: p.prix,
+                  description: p.description ?? null,
+                  url_photo: p.url_photo ?? null,
+                  prix_promo: p.prix_promo ?? null,
+                  id_restaurant: created.id_restaurant,
+                  id_section: createdSection.id_section,
+                },
+              });
+            }
+          }
+        }
+      }
     }
   }
 
