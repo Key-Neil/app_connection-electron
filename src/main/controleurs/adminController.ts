@@ -73,11 +73,40 @@ async function getProfile(userId) {
     return null;
   }
 }
+
+async function addStaffToRestaurant(staffUserId, restaurantId) {
+  try {
+    await prisma.restaurant.update({
+      where: { id_restaurant: Number(restaurantId) },
+      data: { staff: { connect: { id_utilisateur: Number(staffUserId) } } },
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('Erreur lors du rattachement du staff au restaurant:', err);
+    return { success: false, error: err.message };
+  }
+}
+
+async function removeStaffFromRestaurant(staffUserId, restaurantId) {
+  try {
+    await prisma.restaurant.update({
+      where: { id_restaurant: Number(restaurantId) },
+      data: { staff: { disconnect: { id_utilisateur: Number(staffUserId) } } },
+    });
+    return { success: true };
+  } catch (err) {
+    console.error('Erreur lors du détachement du staff du restaurant:', err);
+    return { success: false, error: err.message };
+  }
+}
+
 module.exports = {
   getRoles,
   getUsers,
   setRoles,
   getProfile,
+  addStaffToRestaurant,
+  removeStaffFromRestaurant,
 };
 
 export {};

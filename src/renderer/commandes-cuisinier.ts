@@ -27,10 +27,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div>Produits : ${(c.details || []).map(d => `${d.produit?.nom || 'produit'} x${d.quantite}`).join(', ')}</div>
       </div>
     `).join('');
-        listDiv.querySelectorAll('.save-order').forEach(btn => {
+        listDiv.querySelectorAll<HTMLButtonElement>('.save-order').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = btn.dataset.id;
-                const statut = listDiv.querySelector(`select.status-select[data-id='${id}']`).value;
+                const id = Number(btn.dataset.id);
+                const statut = (listDiv.querySelector(`select.status-select[data-id='${btn.dataset.id}']`) as HTMLSelectElement).value;
                 const res = await window.api.updateCommandeStatus(user.id, id, statut);
                 if (res && res.success)
                     alert('Statut mis à jour');

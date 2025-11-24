@@ -25,5 +25,5 @@
     "noEmitOnError": false
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "copy-assets.js"]
+  "exclude": ["node_modules", "dist"]
 }

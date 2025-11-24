@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'index.html';
         return;
     }
-    const selectEl = document.getElementById('restaurant-select');
+    const selectEl = document.getElementById('restaurant-select') as HTMLSelectElement;
     const detailEl = document.getElementById('restaurant-detail');
     const cartEl = document.getElementById('cart-container');
     detailEl.innerText = 'Chargement...';
@@ -45,9 +45,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             addForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = addForm.querySelector('button');
-                const nom = addForm.querySelector('#add-nom').value.trim();
-                const adresse = addForm.querySelector('#add-adr').value.trim();
-                const telephone = addForm.querySelector('#add-tel').value.trim();
+                const nom = (addForm.querySelector('#add-nom') as HTMLInputElement).value.trim();
+                const adresse = (addForm.querySelector('#add-adr') as HTMLInputElement).value.trim();
+                const telephone = (addForm.querySelector('#add-tel') as HTMLInputElement).value.trim();
                 if (!nom) {
                     showMessage(detailEl, 'Le nom est requis.', 'error');
                     return;
@@ -162,12 +162,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     selectEl.addEventListener('change', () => renderSelectedRestaurant());
     function attachDetailEvents() {
-        detailEl.querySelectorAll('.del-resto').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.del-resto').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 if (!confirm('Supprimer ce restaurant ?'))
                     return;
                 btn.disabled = true;
-                const res = await window.api.deleteRestaurant(user.id, btn.dataset.id);
+                const restaurantId = Number(btn.dataset.id);
+                const res = await window.api.deleteRestaurant(user.id, restaurantId);
                 if (res && res.success) {
                     showMessage(detailEl, 'Restaurant supprimé.', 'success');
                     refresh();
@@ -178,7 +179,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.edit-resto').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.edit-resto').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = btn.dataset.id;
                 const nom = prompt('Nouveau nom ?');
@@ -189,7 +190,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 btn.disabled = true;
-                const res = await window.api.updateRestaurant(id, { nom, adresse, telephone });
+                const restaurantId = Number(id);
+                const res = await window.api.updateRestaurant(restaurantId, { nom, adresse, telephone });
                 if (res && res.success) {
                     showMessage(detailEl, 'Restaurant modifié.', 'success');
                     refresh();
@@ -200,12 +202,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.del-prod').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.del-prod').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 if (!confirm('Supprimer ce produit ?'))
                     return;
                 btn.disabled = true;
-                const res = await window.api.deleteProduit(user.id, btn.dataset.id);
+                const produitId = Number(btn.dataset.id);
+                const res = await window.api.deleteProduit(user.id, produitId);
                 if (res && res.success) {
                     showMessage(detailEl, 'Produit supprimé.', 'success');
                     refresh();
@@ -216,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.edit-prod').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.edit-prod').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = btn.dataset.id;
                 const sectionId = btn.dataset.section;
@@ -229,7 +232,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 btn.disabled = true;
-                const res = await window.api.updateProduit(user.id, id, {
+                const produitId = Number(id);
+                const res = await window.api.updateProduit(user.id, produitId, {
                     nom,
                     prix: parseFloat(prix),
                     description: description || null,
@@ -245,7 +249,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.add-prod-btn').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.add-prod-btn').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const sectionId = Number(btn.dataset.section);
                 const nom = prompt('Nom du produit ?');
@@ -277,13 +281,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.add-section-form').forEach(form => {
+        detailEl.querySelectorAll<HTMLFormElement>('.add-section-form').forEach(form => {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = form.querySelector('button');
                 const restoId = Number(form.dataset.resto);
-                const nom = form.querySelector('.section-nom').value.trim();
-                const description = form.querySelector('.section-desc').value.trim();
+                const nom = form.querySelector<HTMLInputElement>('.section-nom').value.trim();
+                const description = form.querySelector<HTMLInputElement>('.section-desc').value.trim();
                 if (!nom) {
                     showMessage(detailEl, 'Le nom de la section est requis.', 'error');
                     return;
@@ -301,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.edit-section').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.edit-section').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 const id = btn.dataset.id;
                 const nom = prompt('Nouveau nom de la section ?');
@@ -311,7 +315,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     return;
                 }
                 btn.disabled = true;
-                const res = await window.api.updateSection(user.id, id, { nom, description: description || null });
+                const sectionId = Number(id);
+                const res = await window.api.updateSection(user.id, sectionId, { nom, description: description || null });
                 if (res && res.success) {
                     showMessage(detailEl, 'Section modifiée.', 'success');
                     refresh();
@@ -322,12 +327,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.del-section').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.del-section').forEach(btn => {
             btn.addEventListener('click', async (e) => {
                 if (!confirm('Supprimer cette section ?'))
                     return;
                 btn.disabled = true;
-                const res = await window.api.deleteSection(user.id, btn.dataset.id);
+                const sectionId = Number(btn.dataset.id);
+                const res = await window.api.deleteSection(user.id, sectionId);
                 if (res && res.success) {
                     showMessage(detailEl, 'Section supprimée.', 'success');
                     refresh();
@@ -338,7 +344,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        detailEl.querySelectorAll('.order-btn').forEach(btn => {
+        detailEl.querySelectorAll<HTMLButtonElement>('.order-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const pid = Number(btn.dataset.id);
                 const restoId = Number(btn.dataset.resto);
@@ -390,7 +396,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         ul.style.padding = '0';
         let total = 0;
         cart.forEach((it, idx) => {
-            const li = document.createElement('li');
+            const li = document.createElement('li') as HTMLLIElement;
             li.style.padding = '0.5rem 0';
             const sub = (it.prix * it.quantite);
             total += sub;
@@ -406,15 +412,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkoutBtn.className = 'btn-primary';
         checkoutBtn.textContent = 'Passer au paiement';
         cartEl.appendChild(checkoutBtn);
-        cartEl.querySelectorAll('input[type=number]').forEach(inp => {
+        cartEl.querySelectorAll<HTMLInputElement>('input[type=number]').forEach(inp => {
             inp.addEventListener('change', (e) => {
-                const idx = Number(e.target.dataset.idx);
-                const v = parseInt(e.target.value) || 1;
+                const idx = Number((e.target as HTMLInputElement).dataset.idx);
+                const v = parseInt((e.target as HTMLInputElement).value) || 1;
                 cart[idx].quantite = v;
                 renderCart();
             });
         });
-        cartEl.querySelectorAll('button.btn-danger').forEach(b => {
+        cartEl.querySelectorAll<HTMLButtonElement>('button.btn-danger').forEach(b => {
             b.addEventListener('click', () => {
                 const idx = Number(b.dataset.idx);
                 cart.splice(idx, 1);

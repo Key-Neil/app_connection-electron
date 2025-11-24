@@ -5,26 +5,34 @@
   "main": "dist/main/main.js",
   "scripts": {
     "build": "tsx build.ts",
-    "copy-assets": "tsx copy-assets.ts",
     "clean": "rimraf dist",
     "rebuild": "npm run clean && npm run build",
-    "start": "npm run build && electron .",
+    "start": "npm run build && electron-forge start",
+    "package": "npm run build && electron-forge package",
+    "make": "npm run build && electron-forge make",
     "dev": "electron .",
     "seed": "tsx prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Key_Neil",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^5.17.0",
-    "bcryptjs": "^2.4.3",
-    "electron": "^31.2.1"
+    "bcryptjs": "^2.4.3"
   },
   "devDependencies": {
+    "@electron-forge/cli": "^7.10.2",
+    "@electron-forge/maker-deb": "^7.10.2",
+    "@electron-forge/maker-rpm": "^7.10.2",
+    "@electron-forge/maker-squirrel": "^7.10.2",
+    "@electron-forge/maker-zip": "^7.10.2",
+    "@types/bcryptjs": "^2.4.6",
     "@types/electron": "^1.4.38",
     "@types/node": "^24.10.1",
+    "electron": "^31.2.1",
     "prisma": "^5.17.0",
+    "rimraf": "^5.0.10",
     "ts-loader": "^9.5.4",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"

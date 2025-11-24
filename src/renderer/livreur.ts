@@ -25,10 +25,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         <button data-id="${l.id}" class="save-liv">Enregistrer</button>
       </div>
     `).join('\n');
-        livDiv.querySelectorAll('.save-liv').forEach(btn => {
+        livDiv.querySelectorAll<HTMLButtonElement>('.save-liv').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = e.target.dataset.id;
-                const statut = livDiv.querySelector(`select.status-select[data-id="${id}"]`).value;
+                const id = Number((e.target as HTMLButtonElement).dataset.id);
+                const statut = (livDiv.querySelector(`select.status-select[data-id="${(e.target as HTMLButtonElement).dataset.id}"]`) as HTMLSelectElement).value;
                 const res = await window.api.updateLivraisonStatus(user.id, id, statut);
                 if (res && res.success)
                     alert('Statut mis à jour');

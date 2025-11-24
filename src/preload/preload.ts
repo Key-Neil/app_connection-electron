@@ -30,4 +30,7 @@ contextBridge.exposeInMainWorld('api', {
   updateSection: (userId, sectionId, data) => ipcRenderer.invoke('restaurant:updateSection', userId, sectionId, data),
   deleteSection: (userId, sectionId) => ipcRenderer.invoke('restaurant:deleteSection', userId, sectionId),
   createCommande: (userId, payload) => ipcRenderer.invoke('commande:create', userId, payload),
-});
+  // Admin - attach staff to restaurant
+  addStaffToRestaurant: (staffUserId, restaurantId) => ipcRenderer.invoke('admin:addStaffToRestaurant', staffUserId, restaurantId),
+  removeStaffFromRestaurant: (staffUserId, restaurantId) => ipcRenderer.invoke('admin:removeStaffFromRestaurant', staffUserId, restaurantId),
+ });

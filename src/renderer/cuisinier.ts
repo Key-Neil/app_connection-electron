@@ -27,11 +27,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <button data-id="${r.id}" class="save-resto">Enregistrer</button>
       </div>
     `).join('\n');
-        restosDiv.querySelectorAll('.save-resto').forEach(btn => {
+        restosDiv.querySelectorAll<HTMLButtonElement>('.save-resto').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = parseInt(e.target.dataset.id);
-                const addr = restosDiv.querySelector(`input.resto-addr[data-id="${id}"]`).value;
-                const tel = restosDiv.querySelector(`input.resto-tel[data-id="${id}"]`).value;
+                const id = parseInt((e.target as HTMLButtonElement).dataset.id);
+                const addr = (restosDiv.querySelector(`input.resto-addr[data-id="${id}"]`) as HTMLInputElement).value;
+                const tel = (restosDiv.querySelector(`input.resto-tel[data-id="${id}"]`) as HTMLInputElement).value;
                 const res = await window.api.updateRestaurant(id, { adresse: addr, telephone: tel });
                 if (res && res.success)
                     alert('Restaurant mis à jour');

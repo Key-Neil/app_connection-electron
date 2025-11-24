@@ -25,15 +25,15 @@ document.addEventListener('DOMContentLoaded', () => {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const data = {
-                nom: document.getElementById('register-nom').value,
-                prenom: document.getElementById('register-prenom').value,
-                email: document.getElementById('register-email').value,
-                mot_de_passe: document.getElementById('register-password').value,
+                nom: (document.getElementById('register-nom') as HTMLInputElement).value,
+                prenom: (document.getElementById('register-prenom') as HTMLInputElement).value,
+                email: (document.getElementById('register-email') as HTMLInputElement).value,
+                mot_de_passe: (document.getElementById('register-password') as HTMLInputElement).value,
             };
             const result = await window.auth.register(data);
             showMessage(registerMessage, result.message, result.success ? 'success' : 'error');
             if (result.success) {
-                registerForm.reset();
+                (registerForm as HTMLFormElement).reset();
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1200);
@@ -52,8 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const data = {
-                email: document.getElementById('login-email').value,
-                mot_de_passe: document.getElementById('login-password').value,
+                email: (document.getElementById('login-email') as HTMLInputElement).value,
+                mot_de_passe: (document.getElementById('login-password') as HTMLInputElement).value,
             };
             const result = await window.auth.login(data);
             showMessage(loginMessage, result.message, result.success ? 'success' : 'error');

@@ -30,10 +30,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
         listDiv.appendChild(availDiv);
         listDiv.appendChild(mineDiv);
-        listDiv.querySelectorAll('.claim-btn').forEach(btn => {
+        listDiv.querySelectorAll<HTMLButtonElement>('.claim-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 btn.disabled = true;
-                const res = await window.api.createLivraison(user.id, btn.dataset.id);
+                const commandeId = Number(btn.dataset.id);
+                const res = await window.api.createLivraison(user.id, commandeId);
                 if (res && res.success) {
                     alert('Livraison assignée.');
                     location.reload();
@@ -44,10 +45,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
         });
-        listDiv.querySelectorAll('.save-liv').forEach(btn => {
+        listDiv.querySelectorAll<HTMLButtonElement>('.save-liv').forEach(btn => {
             btn.addEventListener('click', async (e) => {
-                const id = btn.dataset.id;
-                const statut = listDiv.querySelector(`select.status-select[data-id='${id}']`).value;
+                const id = Number(btn.dataset.id);
+                const statut = (listDiv.querySelector(`select.status-select[data-id='${btn.dataset.id}']`) as HTMLSelectElement).value;
                 const res = await window.api.updateLivraisonStatus(user.id, id, statut);
                 if (res && res.success)
                     alert('Statut mis à jour');

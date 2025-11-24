@@ -141,3 +141,12 @@ ipcMain.handle('admin:setRoles', async (event, userId, roleNames) =>
 ipcMain.handle('user:getProfile', async (event, userId) =>
   adminController.getProfile(userId)
 );
+
+// Admin: attach staff (cuisinier) to restaurant
+ipcMain.handle('admin:addStaffToRestaurant', async (event, staffUserId, restaurantId) =>
+  adminController.addStaffToRestaurant(staffUserId, restaurantId)
+);
+// Admin: detach staff (cuisinier) from restaurant
+ipcMain.handle('admin:removeStaffFromRestaurant', async (event, staffUserId, restaurantId) =>
+  adminController.removeStaffFromRestaurant(staffUserId, restaurantId)
+);
