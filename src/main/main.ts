@@ -1,4 +1,3 @@
-
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const bcrypt = require('bcryptjs');
@@ -11,12 +10,18 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
     },
+  });
+  
+  win.once('ready-to-show', () => {
+    win.show();
+    win.focus();
   });
   
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
@@ -57,7 +62,6 @@ async function userHasAnyRole(userId: number, allowedRoles: string[]): Promise<b
     return false;
   }
 }
-
 ipcMain.handle('auth:register', async (event, data) => {
   const { nom, prenom, email, mot_de_passe } = data;
   try {
@@ -655,13 +659,14 @@ ipcMain.handle('commande:updateStatus', async (event, userId, commandeId, statut
     if (!cmd) {
       return { success: false, error: 'Commande introuvable' };
     }
-    
+
     const user = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: Number(userId) },
       include: { utilisateur_roles: { include: { role: true } } },
     });
     
     const roleNames = user?.utilisateur_roles.map((ur: any) => ur.role.nom_role) || [];
+    
     
     if (roleNames.includes('Cuisinier') || roleNames.includes('Admin')) {
       if (roleNames.includes('Cuisinier') && !roleNames.includes('Admin')) {
@@ -692,6 +697,7 @@ ipcMain.handle('commande:updateStatus', async (event, userId, commandeId, statut
     return { success: false, error: err.message };
   }
 });
+
 
 ipcMain.handle('livraison:getForLivreur', async (event, userId) => {
   try {
@@ -872,7 +878,6 @@ ipcMain.handle('livraison:updateStatus', async (event, userId, livraisonId, stat
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('user:getProfile', async (event, userId) => {
   try {
     const user = await prisma.utilisateur.findUnique({
@@ -918,5 +923,3 @@ ipcMain.handle('cook:getRestaurants', async (event, userId) => {
 });
 
 export {};
-
-

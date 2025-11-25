@@ -1,3 +1,7 @@
+body, input, button, select, textarea { 
+    pointer-events: auto !important; 
+}
+
 :root {
 	--primary: #007aff;
 	--primary-dark: #0056b3;
@@ -23,13 +27,13 @@ input, textarea, select {
 	-webkit-app-region: no-drag;
 	pointer-events: auto !important;
 	cursor: text !important;
+    position: relative;
+    z-index: 100;
 }
 input:focus, textarea:focus, select:focus {
 	outline: 2px solid var(--primary);
 	outline-offset: 2px;
 }
-
-/* Fix pour les modales et inputs dans Electron */
 #restaurant-modal, #menu-modal, .modal, .view {
     -webkit-app-region: no-drag !important;
 }
@@ -48,46 +52,7 @@ body {
 	color: var(--dark);
 	line-height: 1.6;
 }
-nav#main-menu {
-	max-width: 95%;
-	margin: 1.5rem auto;
-	background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-	color: #fff;
-	padding: 1rem 2rem;
-	border-radius: var(--radius);
-	box-shadow: var(--shadow-lg);
-	display: flex;
-	justify-content: center;
-	gap: 2rem;
-	flex-wrap: wrap;
-	align-items: center;
-}
-nav#main-menu a {
-	color: #fff;
-	text-decoration: none;
-	font-weight: 500;
-	font-size: 0.95rem;
-	transition: var(--transition);
-	padding: 0.5rem 1rem;
-	border-radius: 4px;
-	position: relative;
-}
-nav#main-menu a::after {
-	content: '';
-	position: absolute;
-	bottom: 0;
-	left: 0;
-	width: 0;
-	height: 2px;
-	background: #fff;
-	transition: width 0.3s ease;
-}
-nav#main-menu a:hover {
-	background: rgba(255,255,255,0.1);
-}
-nav#main-menu a:hover::after {
-	width: 100%;
-}
+
 h1, h2, h3, h4, h5, h6 {
 	text-align: center;
 	color: var(--dark);
@@ -684,15 +649,6 @@ tbody tr:last-child td {
 .opacity-50 { opacity: 0.5; }
 .opacity-75 { opacity: 0.75; }
 @media (max-width: 768px) {
-	nav#main-menu {
-		flex-direction: column;
-		gap: 1rem;
-		padding: 1rem;
-	}
-	nav#main-menu a {
-		width: 100%;
-		text-align: center;
-	}
 	.container {
 		padding: 2rem 1.5rem;
 		margin: 1rem auto;
@@ -757,7 +713,7 @@ tbody tr:last-child td {
 	}
 }
 @media print {
-	nav#main-menu, button, .btn, .toggle-link {
+	button, .btn, .toggle-link {
 		display: none;
 	}
 	body {
@@ -767,4 +723,11 @@ tbody tr:last-child td {
 		box-shadow: none;
 		border: 1px solid var(--border);
 	}
+}
+#restaurant-modal input, #menu-modal input, 
+#restaurant-modal textarea, #menu-modal textarea, 
+#restaurant-modal select, #menu-modal select {
+    z-index: 10001 !important;
+    position: relative !important;
+    pointer-events: auto !important;
 }

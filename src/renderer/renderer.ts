@@ -14,10 +14,7 @@ function ensureInputAccess() {
     input.style.webkitAppRegion = 'no-drag';
     
     if (!input.dataset.clickAttached) {
-      input.addEventListener('click', (e: any) => {
-        e.stopPropagation();
-        input.focus();
-      });
+      // Suppression du listener 'click' qui pourrait interférer
       input.dataset.clickAttached = 'true';
     }
   });
@@ -42,7 +39,9 @@ if (typeof window !== 'undefined') {
     ensureInputAccess();
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['style', 'class']
     });
   });
 
@@ -999,6 +998,7 @@ function showAddRestaurantModal() {
   telephoneInput.value = '';
   
   modal.style.display = 'flex';
+  ensureInputAccess();
 
   const saveBtn = document.getElementById('restaurant-modal-save');
   const cancelBtn = document.getElementById('restaurant-modal-cancel');
@@ -1060,6 +1060,7 @@ function showAddRestaurantModal() {
   telephoneInput.value = resto.telephone;
   
   modal.style.display = 'flex';
+  ensureInputAccess();
   
   const saveBtn = document.getElementById('restaurant-modal-save');
   const cancelBtn = document.getElementById('restaurant-modal-cancel');
@@ -1134,6 +1135,7 @@ let currentRestaurantId: number | null = null;
   
   title.textContent = `Gestion du menu - ${restaurantNom}`;
   modal.style.display = 'flex';
+  ensureInputAccess();
   
   await loadRestaurantSections(restaurantId);
 
