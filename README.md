@@ -1,71 +1,48 @@
-# 🍕 Application de Livraison - Connextion
+# 🚀 Keynect – Application de Livraison & Gestion Restaurant
 
-Application de gestion de commandes de repas avec suivi de livraison en temps réel. Construite avec **Electron**, **TypeScript**, **Node.js**, **Prisma** et **MySQL**.
+Keynect est une application de gestion de commandes de repas (restaurants, préparation, livraison, administration des rôles) construite avec **Electron**, **TypeScript**, **Prisma**, **Node.js** et **MySQL**. Ce README vous permet de lancer le projet sur un PC.
 
-## ⚡ NOUVEAU : Architecture Simplifiée !
+## ⚡ Architecture
 
-Ce projet a été **radicalement simplifié** pour faciliter l'apprentissage :
-
-```
-📁 Structure minimale :
-   ├── src/main/main.ts          → TOUT LE BACKEND (1000 lignes)
+📁 Structure :
+   ├── src/main/main.ts          → Backend unifié (IPC + Prisma)
    ├── src/preload/preload.ts    → Exposition API
    ├── src/renderer/index.html   → SPA UNIQUE
-   └── src/renderer/renderer.ts  → TOUT LE FRONTEND (900 lignes)
+   └── src/renderer/renderer.ts  → TOUT LE FRONTEND
 
-❌ Supprimé : dossier controleurs/, fichiers HTML/TS multiples
-✅ Résultat : 4 fichiers principaux au lieu de 20+
-```
+## 📸 Fonctionnalités Clés
 
-## 🗄️ Nouveau Schéma Normalisé (Boyce-Codd)
+- Client : Parcourir restaurants, panier, commande, suivi
+- Cuisinier : Voir / mettre à jour le statut des commandes
+- Livreur : Voir commandes prêtes, accepter, livrer
+- Admin : Gérer utilisateurs, rôles, staff restaurants, menus
+- Séctions & produits : Stockage mixte (BDD + JSON sections)
 
-Le schéma de base de données a été **refactorisé** pour suivre les normes SQL strictes:
 
-- **Tables explicites de jonction** : `utilisateur_role` et `staff_restaurant` remplacent les tables implicites Prisma
-- **Clés primaires composites** : Assure l'unicité des relations many-to-many
-- **Nommage sémantique** : Colonnes avec noms clairs (`id_utilisateur`, `id_role`) au lieu de `A`/`B`
-- **Suppression en cascade** : Maintien automatique de l'intégrité référentielle
-
-**Avant:** `_effectuerrole` (table implicite avec colonnes A/B)  
-**Après:** `utilisateur_role` (table explicite avec id_utilisateur, id_role)
-
-## 📸 Fonctionnalités
-
-- **Clients**: Parcourir restaurants, commander des repas, payer
-- **Restaurants**: Gérer menu et sections, valider commandes
-- **Cuisiniers**: Recevoir et préparer les commandes
-- **Livreurs**: Récupérer et livrer les commandes
-- **Admin**: Gérer utilisateurs et permissions
-
----
-
-## 📋 Prérequis (IMPORTANT)
+## 📋 Prérequis
 
 Avant de commencer, assurez-vous d'avoir installé:
 
-1. **Node.js** (v18 ou supérieur)
+1. **Node.js** (v18 ou supérieur recommandé)
    - Télécharger: https://nodejs.org/
    - Vérifier: `node --version`
 
-2. **MySQL** (Serveur local ou distant)
+2. **MySQL** (Local recommandé – 8.x)
    - Télécharger: https://www.mysql.com/downloads/
    - Vérifier: `mysql --version` (depuis cmd/PowerShell)
 
 3. **Git** (pour cloner le repo)
    - Télécharger: https://git-scm.com/
 
----
 
-## 🚀 Installation complète (5 minutes)
-
-### 1️⃣ Cloner le projet
+## 1️⃣ Cloner le projet
 
 ```bash
 git clone https://github.com/Key-Neil/app_connection-electron.git
 cd app_connection-electron
 ```
 
-### 2️⃣ Installer les dépendances npm
+## 2️⃣ Installer les dépendances npm
 
 ```bash
 npm install
@@ -77,9 +54,9 @@ Cela installe:
 - Prisma (ORM base de données)
 - Autres dépendances
 
-### 3️⃣ Configurer la base de données
+## 3️⃣ Configurer la base de données (MySQL)
 
-#### Option A: MySQL local (recommandé)
+## Option A: MySQL local (recommandé)
 
 1. **Créer un fichier `.env` à la racine** du projet:
    ```bash
@@ -95,18 +72,10 @@ Cela installe:
    DATABASE_URL="mysql://root:votreMotDePasse@localhost:3306/app_connection"
    ```
    - Remplacez `votreMotDePasse` par votre mot de passe MySQL
-   - Si pas de mot de passe: `mysql://root@localhost:3306/app_connection`
 
-#### Option B: Utiliser Prisma PostgreSQL (cloud)
+> PostgreSQL est possible mais non couvert dans ce guide. Restez sur MySQL pour la reproductibilité.
 
-1. Créer un compte gratuit: https://console.prisma.io
-2. Créer une nouvelle base de données
-3. Copier la chaîne de connexion dans `.env`:
-   ```
-   DATABASE_URL="[votre-url-postgres-du-console-prisma]"
-   ```
-
-### 4️⃣ Initialiser la base de données
+### 4️⃣ Initialiser / Migrer / Peupler
 
 ```bash
 # Créer les tables dans la BD
@@ -115,14 +84,13 @@ npx prisma migrate dev --name init
 # (Ou utiliser) - Créer et mettre à jour le schéma
 npx prisma db push
 
-# Insérer les données de test (Admin, 3 restaurants, produits)
-npm run seed
+npm run seed   # Insère les rôles et comptes par défaut + exemples
 ```
 
-**Résultat attendu:**
-- ✅ 5 tables créées (Utilisateur, Restaurant, Commande, Livraison, Rôle)
-- ✅ 1 utilisateur Admin (email: admin@gmail.com, mot de passe: admin)
-- ✅ 3 restaurants pré-remplis avec menus
+**Résultat attendu :**
+- ✅ Tables Prisma (Utilisateurs, Roles, Utilisateurs_Roles, Restaurants, Produits, Commandes, Details_Commande, Livraisons, Staff_Restaurants)
+- ✅ Comptes de test en place (voir plus bas)
+- ✅ Rôles insérés (Client, Cuisinier, Livreur, Admin)
 
 ---
 
@@ -134,9 +102,7 @@ npm run seed
 npm start
 ```
 
-L'application démarre, et vous pouvez vous connecter avec:
-- **Email**: admin@gmail.com
-- **Mot de passe**: admin
+L’application démarre. Utilisez un des comptes seed ci‑dessous ou inscrivez-vous.
 
 ### Pour développer (mode debug):
 
@@ -146,7 +112,7 @@ npm run dev
 
 ---
 
-## 📁 Structure du projet (Simplifiée)
+## 📁 Structure du projet
 
 ```
 app_connection-electron/
@@ -171,72 +137,71 @@ app_connection-electron/
 └── README.md              # Ce fichier
 ```
 
-**Évolution majeure:**
-- Anciennement: 20+ fichiers HTML/TS/Controller éparpillés
-- Maintenant: 4 fichiers principaux (main, preload, index.html, renderer)
-- Code épuré: Zéro commentaires, logique consolidée
+**Points clés :**
+- `main.ts` : Handlers IPC + accès Prisma
+- `preload.ts` : Pont sécurisé (contextIsolation)
+- `renderer.ts` : Logique UI (routing interne + rôle gating)
+- `sections.json` (généré) : Stockage persistant des sections de menu (produits liés dans la BDD)
 
 ---
 
-## 🛠️ Scripts npm disponibles
+## 🛠️ Scripts npm
 
 ```bash
 npm run build              # Compile TypeScript → JavaScript
 npm start                  # Build + lance l'app Electron
-npm run dev                # Lance l'app sans recompilation
+npm run dev                # Lance Electron direct (usage ponctuel)
+npm run make               # Génère un exécutable / paquet (Electron Forge)
 npm run rebuild            # Recompile tout de zéro
 npm run seed               # Injecte les données de test
 ```
 
 ---
 
-## 🔐 Comptes de test pré-remplis
+## 🔐 Comptes de test (après `npm run seed`)
 
-Après `npm run seed`:
+| Rôle       | Email                | Mot de passe |
+|------------|----------------------|--------------|
+| Admin      | admin@keynect.com    | test         |
+| Cuisinier  | chef@keynect.com     | test         |
+| Livreur    | livreur@keynect.com  | test         |
 
-| Rôle | Email | Mot de passe |
-|------|-------|-------------|
-| **Admin** | admin@gmail.com | admin |
+Le rôle **Client** est attribué automatiquement à chaque nouvelle inscription. Les autres rôles se gèrent via l’interface Admin.
 
-Pour tester les autres rôles, créez des comptes via l'interface d'enregistrement.
+> Si vous modifiez le seed et ne voyez pas le changement : relancez `npm run seed` après avoir vidé / recréé la base (ou `npx prisma migrate reset`).
 
 ---
 
-## ❓ Dépannage
+## ❓ Dépannage & FAQ
 
 ### Erreur: `DATABASE_URL not found`
-**Solution**: Créez le fichier `.env` avec votre URL MySQL (voir section 3)
+Créer `.env` à la racine avec la variable exacte (voir section config BD).
 
 ### Erreur: `Can't connect to MySQL server`
-**Solutions**:
-- Vérifier que MySQL est lancé
-- Vérifier l'adresse (localhost), le port (3306), le mot de passe
-- Tester la connexion: `mysql -u root -p`
+Vérifier service MySQL actif, port (`3306`), firewall Windows, mot de passe.
 
 ### Erreur: `Prisma Client not found`
-**Solution**:
+Exécuter :
 ```bash
 npm install
 npx prisma generate
 ```
 
-### L'application se lance mais les pages sont blanches
-**Solution**:
+### Pages blanches
+Compiler avant de lancer :
 ```bash
 npm run build
 npm start
 ```
 
----
 
-## 📚 Documentation des rôles
+## 📚 Rôles & Accès (Front + Back)
 
 ### 👤 Client
 - Se connecter / s'inscrire
 - Parcourir les restaurants et menus
 - Ajouter des articles au panier
 - Passer une commande
-- Jouer à Snake pour une réduction
 - Suivre ses commandes
 
 ### 🏪 Restaurant
@@ -256,12 +221,13 @@ npm start
 - Confirmer la livraison
 
 ### 👑 Admin
-- Gérer tous les utilisateurs
-- Assigner les rôles et permissions
+- Gère rôles, staff restaurant, menus globaux.
+
+> Le frontend vérifie les rôles avant d’afficher les vues (`showView` + garde).
 
 ---
 
-## 🔧 Technologie utilisée
+## 🔧 Pile Technique
 
 | Technologie | Version | Utilisation |
 |-----------|---------|------------|
@@ -269,7 +235,7 @@ npm start
 | **TypeScript** | v5.9+ | Typage strict |
 | **Node.js** | v18+ | Runtime |
 | **Prisma** | v5.17+ | ORM base de données |
-| **MySQL** | - | Base de données |
+| **MySQL** | 8.x | Base de données relationnelle |
 | **Bcryptjs** | v2.4+ | Hashage mots de passe |
 
 ---
@@ -285,16 +251,63 @@ DATABASE_URL="mysql://root:motdepasse@localhost:3306/app_connection"
 
 ---
 
-## ✅ Checklist avant de lancer
+## ✅ Checklist Avant Lancement
 
 - [ ] Node.js installé (`node --version`)
 - [ ] MySQL en cours d'exécution
 - [ ] `.env` créé avec `DATABASE_URL`
 - [ ] `npm install` exécuté
-- [ ] `npx prisma db push` exécuté
+- [ ] `npx prisma migrate dev` OU `npx prisma db push` exécuté
 - [ ] `npm run seed` exécuté
 - [ ] `npm start` lance l'app sans erreurs
 
 ---
 
-**Bonne utilisation de Connextion! 🚀**
+## 📦 Générer un exécutable
+
+Pour créer un paquet (installer / dossier) :
+```bash
+npm run make
+```
+Les artefacts se trouvent dans `out/` (Electron Forge).
+
+## 🔄 Mise à jour / Migration
+
+Lorsque vous modifiez `schema.prisma` :
+```bash
+npx prisma migrate dev --name change_description
+```
+Si base incohérente en dev :
+```bash
+npx prisma migrate reset --force
+npm run seed
+```
+
+## 🧪 Vérification Rapide (Smoke Test)
+1. Inscription d’un nouveau compte → rôle Client visible → bouton “Mes Commandes” apparaît.
+2. Ajout d’un restaurant (Admin) → apparaît dans liste client.
+3. Ajout produit → visible côté client → commande créée → visible dans “Mes Commandes”.
+4. Attribution rôle Cuisinier → accès vue “Cuisinier” → mise à jour statut.
+5. Passage statut “Prête” → visible côté Livreur → acceptation → livraison.
+
+## ✨ Personnalisation Seed
+Modifier `src/main/prisma/seed.ts` :
+- Ajouter restaurants supplémentaires
+- Insérer produits par défaut
+- Adapter emails de comptes démo
+
+Relancer ensuite :
+```bash
+npx prisma migrate reset --force
+npm run seed
+```
+
+## 🔐 Sécurité (Points à améliorer pour production)
+- Ajout de vérifications de rôle côté backend pour chaque handler (partiel actuellement)
+- Séparation réelle des responsabilités (micro‑modules)
+- Sanitisation des entrées (valider prix, emails, etc.)
+- Gestion sessions / tokens (actuellement contexte mémoire simple)
+
+---
+
+**Bon usage de Keynect ! 🚀**
