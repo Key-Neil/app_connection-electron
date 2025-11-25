@@ -1,5 +1,5 @@
 {
-  "name": "projet-livraison-electron",
+  "name": "keynect",
   "version": "1.0.0",
   "description": "Application de livraison avec Electron et Prisma",
   "main": "dist/main/main.js",
@@ -11,7 +11,7 @@
     "package": "npm run build && electron-forge package",
     "make": "npm run build && electron-forge make",
     "dev": "electron .",
-    "seed": "tsx prisma/seed.ts",
+    "seed": "tsx src/main/prisma/seed.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -38,6 +38,7 @@
     "typescript": "^5.9.3"
   },
   "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "schema": "src/main/prisma/schema.prisma",
+    "seed": "tsx src/main/prisma/seed.ts"
   }
 }
