@@ -50,7 +50,32 @@ if (typeof window !== 'undefined') {
   }, true);
 }
 
+function userHasRole(role: string): boolean {
+  return !!(currentUser && Array.isArray(currentUser.roles) && currentUser.roles.includes(role));
+}
+
+function canAccessView(viewId: string): boolean {
+  switch (viewId) {
+    case 'view-commandes':
+      return userHasRole('Client');
+    case 'view-cook':
+      return userHasRole('Cuisinier');
+    case 'view-livreur':
+      return userHasRole('Livreur');
+    case 'view-admin':
+      return userHasRole('Admin');
+    default:
+      return true; // view-restaurants, login, etc.
+  }
+}
+
 function showView(viewId: string) {
+  // Empêcher affichage d'une vue non autorisée
+  if (!canAccessView(viewId)) {
+    console.warn('Accès refusé à la vue:', viewId);
+    viewId = 'view-restaurants';
+  }
+
   const allViews = document.querySelectorAll('.view');
   allViews.forEach(view => {
     (view as HTMLElement).style.display = 'none';

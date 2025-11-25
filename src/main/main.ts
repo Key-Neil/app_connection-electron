@@ -4,15 +4,11 @@ import bcrypt from 'bcryptjs';
 import prisma from './utilitaires/prisma';
 const sectionsUtil = require('./utilitaires/sections');
 
-// ============================================================
-// CONFIGURATION DE LA FENÊTRE PRINCIPALE
-// ============================================================
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
     height: 800,
-    show: false, // Caché au démarrage pour éviter le flash blanc
+    show: false,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
@@ -20,8 +16,6 @@ function createWindow() {
       sandbox: false,
     },
   });
-  
-  // Événement prêt à afficher : on montre et on focus (Important pour les inputs)
   win.once('ready-to-show', () => {
     win.show();
     win.focus();
@@ -31,9 +25,6 @@ function createWindow() {
   return win;
 }
 
-// ============================================================
-// CYCLE DE VIE DE L'APPLICATION
-// ============================================================
 
 app.whenReady().then(() => {
   createWindow();
@@ -46,9 +37,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// ============================================================
-// FONCTIONS UTILITAIRES
-// ============================================================
 
 async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
@@ -73,11 +61,6 @@ async function userHasAnyRole(userId: number, allowedRoles: string[]): Promise<b
     return false;
   }
 }
-
-// ============================================================
-// GESTION DE L'AUTHENTIFICATION (Auth)
-// ============================================================
-
 ipcMain.handle('auth:register', async (event, data) => {
   const { nom, prenom, email, mot_de_passe } = data;
   try {
@@ -91,7 +74,6 @@ ipcMain.handle('auth:register', async (event, data) => {
       data: { nom, prenom, email, mot_de_passe_hash },
     });
     
-    // Rôle par défaut : Client (ID 1)
     await prisma.utilisateurRole.create({
       data: { id_utilisateur: newUser.id_utilisateur, id_role: 1 },
     });
@@ -159,9 +141,6 @@ ipcMain.handle('user:getProfile', async (event, userId) => {
   }
 });
 
-// ============================================================
-// GESTION DES RESTAURANTS & PRODUITS
-// ============================================================
 
 ipcMain.handle('restaurant:getAll', async () => {
   try {
@@ -289,9 +268,6 @@ ipcMain.handle('restaurant:deleteProduit', async (event, userId, produitId) => {
   }
 });
 
-// ============================================================
-// GESTION DES SECTIONS (Fichier JSON)
-// ============================================================
 
 ipcMain.handle('admin:createSection', async (event, restaurantId, data) => {
   try {
@@ -347,10 +323,6 @@ ipcMain.handle('admin:deleteProduit', async (event, restaurantId, sectionId, pro
   }
 });
 
-// ============================================================
-// GESTION DES COMMANDES
-// ============================================================
-
 ipcMain.handle('commande:create', async (event, userId, payload) => {
   try {
     const { id_restaurant, produits } = payload;
@@ -388,7 +360,7 @@ ipcMain.handle('commande:getForClient', async (event, userId) => {
       where: { id_client: Number(userId) },
       include: {
         restaurant: true,
-        details_commande: { include: { produit: true } },
+        details_commande: true,
         livraison: true,
       },
       orderBy: { date_commande: 'desc' },
@@ -400,7 +372,7 @@ ipcMain.handle('commande:getForClient', async (event, userId) => {
       statut: c.statut,
       restaurant: c.restaurant ? { id: c.restaurant.id_restaurant, nom: c.restaurant.nom } : null,
       details: c.details_commande.map((d: any) => ({
-        produit: d.produit ? { id: d.produit.id_produit, nom: d.produit.nom } : null,
+        produit: { id: d.id_produit, nom: null },
         quantite: d.quantite,
         prix_unitaire: d.prix_unitaire,
       })),
@@ -421,7 +393,7 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
     
     const roleNames = user?.utilisateur_roles.map((ur: any) => ur.role.nom_role) || [];
     
-    // Si Cuisinier, on filtre par ses restaurants
+  
     if (roleNames.includes('Cuisinier')) {
       const restos = await prisma.restaurant.findMany({
         where: { staff_restaurants: { some: { id_utilisateur: Number(userId) } } },
@@ -431,7 +403,7 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
       
       const commandes = await prisma.commande.findMany({
         where: { id_restaurant: { in: restoIds } },
-        include: { details_commande: { include: { produit: true } }, client: true },
+        include: { details_commande: true, client: true },
         orderBy: { date_commande: 'desc' },
       });
       
@@ -441,7 +413,7 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
         statut: c.statut,
         client: c.client ? { id: c.client.id_utilisateur, prenom: c.client.prenom, nom: c.client.nom } : null,
         details: c.details_commande.map((d: any) => ({
-          produit: d.produit ? { id: d.produit.id_produit, nom: d.produit.nom } : null,
+          produit: { id: d.id_produit, nom: null },
           quantite: d.quantite,
         })),
       }));
@@ -458,7 +430,6 @@ ipcMain.handle('commande:updateStatus', async (event, userId, commandeId, statut
     const cmd = await prisma.commande.findUnique({ where: { id_commande: Number(commandeId) } });
     if (!cmd) return { success: false, error: 'Commande introuvable' };
 
-    // Vérification des droits (simplifiée ici, idéalement vérifier si le user est staff du resto)
     const updated = await prisma.commande.update({
       where: { id_commande: Number(commandeId) },
       data: { statut },
@@ -488,15 +459,11 @@ ipcMain.handle('cook:getRestaurants', async (event, userId) => {
   }
 });
 
-// ============================================================
-// GESTION DES LIVRAISONS
-// ============================================================
-
 ipcMain.handle('livraison:getAvailableCommandes', async () => {
   try {
     const commandes = await prisma.commande.findMany({
       where: { statut: 'Prête', livraison: null },
-      include: { details_commande: { include: { produit: true } }, restaurant: true, client: true },
+      include: { details_commande: true, restaurant: true, client: true },
       orderBy: { date_commande: 'desc' },
     });
     
@@ -506,7 +473,7 @@ ipcMain.handle('livraison:getAvailableCommandes', async () => {
       restaurant: c.restaurant ? { id: c.restaurant.id_restaurant, nom: c.restaurant.nom, adresse: c.restaurant.adresse } : null,
       client: c.client ? { id: c.client.id_utilisateur, prenom: c.client.prenom } : null,
       details: c.details_commande.map((d: any) => ({
-        produit: d.produit ? { id: d.produit.id_produit, nom: d.produit.nom } : null,
+        produit: { id: d.id_produit, nom: null },
         quantite: d.quantite,
       })),
     }));
@@ -603,10 +570,6 @@ ipcMain.handle('livraison:updateStatus', async (event, userId, livraisonId, stat
     return { success: false, error: err.message };
   }
 });
-
-// ============================================================
-// ADMINISTRATION
-// ============================================================
 
 ipcMain.handle('admin:getUsers', async () => {
   try {
@@ -712,7 +675,6 @@ ipcMain.handle('admin:removeStaffFromRestaurant', async (event, staffUserId, res
   }
 });
 
-// Admin CRUD Restaurant (redondant avec restaurant:add/update mais gardé pour compatibilité)
 ipcMain.handle('admin:createRestaurant', async (event, data) => {
   try {
     const restaurant = await prisma.restaurant.create({
