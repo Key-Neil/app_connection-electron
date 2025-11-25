@@ -2,10 +2,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const { getPrismaClient } = require('./utilitaires/prisma');
-const adminController = require('./controleurs/adminController');
-
 const prisma = getPrismaClient();
-
 function createWindow() {
   const win = new BrowserWindow({
     width: 1200,
@@ -14,38 +11,10 @@ function createWindow() {
       preload: path.join(__dirname, '..', 'preload', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      cache: false,
-      devTools: true,
-      webSecurity: false,
-      enableRemoteModule: false,
-      backgroundThrottling: false,
     },
   });
-  
-  win.webContents.session.clearCache();
-  win.webContents.session.clearStorageData();
-  
-  win.on('focus', () => {
-    win.webContents.executeJavaScript(`
-      if (typeof forceInputInteractivity === 'function') {
-        forceInputInteractivity();
-      }
-    `);
-  });
-  
-  win.on('show', () => {
-    win.webContents.executeJavaScript(`
-      if (typeof forceInputInteractivity === 'function') {
-        forceInputInteractivity();
-      }
-    `);
-  });
-  
   win.loadFile(path.join(__dirname, '..', 'renderer', 'index.html'));
-  
-  return win;
 }
-
 app.whenReady().then(() => {
   createWindow();
   app.on('activate', () => {
@@ -54,22 +23,18 @@ app.whenReady().then(() => {
     }
   });
 });
-
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
 });
-
 async function hashPassword(password: string): Promise<string> {
   const salt = await bcrypt.genSalt(10);
   return bcrypt.hash(password, salt);
 }
-
 async function comparePasswords(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash);
 }
-
 async function userHasAnyRole(userId: number, allowedRoles: string[]): Promise<boolean> {
   try {
     const user = await prisma.utilisateur.findUnique({
@@ -84,34 +49,28 @@ async function userHasAnyRole(userId: number, allowedRoles: string[]): Promise<b
     return false;
   }
 }
-
 ipcMain.handle('auth:register', async (event, data) => {
   const { nom, prenom, email, mot_de_passe } = data;
   try {
     const existingUser = await prisma.utilisateur.findUnique({
       where: { email },
     });
-    
     if (existingUser) {
       return { success: false, message: 'Cet email est déjà utilisé.' };
     }
-    
     const mot_de_passe_hash = await hashPassword(mot_de_passe);
     const newUser = await prisma.utilisateur.create({
       data: { nom, prenom, email, mot_de_passe_hash },
     });
-    
     await prisma.utilisateurRole.create({
       data: { id_utilisateur: newUser.id_utilisateur, id_role: 1 },
     });
-    
     return { success: true, message: 'Compte créé avec succès !' };
   } catch (error) {
     console.error('Erreur inscription:', error);
     return { success: false, message: 'Erreur lors de la création du compte.' };
   }
 });
-
 ipcMain.handle('auth:login', async (event, data) => {
   const { email, mot_de_passe } = data;
   try {
@@ -119,16 +78,13 @@ ipcMain.handle('auth:login', async (event, data) => {
       where: { email },
       include: { utilisateur_roles: { include: { role: true } } },
     });
-    
     if (!user) {
       return { success: false, message: 'Email ou mot de passe incorrect.' };
     }
-    
     const isMatch = await comparePasswords(mot_de_passe, user.mot_de_passe_hash);
     if (!isMatch) {
       return { success: false, message: 'Email ou mot de passe incorrect.' };
     }
-    
     return {
       success: true,
       message: `Bienvenue, ${user.prenom} !`,
@@ -145,7 +101,6 @@ ipcMain.handle('auth:login', async (event, data) => {
     return { success: false, message: 'Erreur lors de la connexion.' };
   }
 });
-
 ipcMain.handle('restaurant:getAll', async () => {
   try {
     const restos = await prisma.restaurant.findMany({
@@ -156,7 +111,6 @@ ipcMain.handle('restaurant:getAll', async () => {
         },
       },
     });
-    
     return restos.map((r: any) => ({
       id: r.id_restaurant,
       nom: r.nom,
@@ -182,15 +136,12 @@ ipcMain.handle('restaurant:getAll', async () => {
     return [];
   }
 });
-
 ipcMain.handle('restaurant:add', async (event, userId, data) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const resto = await prisma.restaurant.create({ data });
-    
     return { 
       success: true, 
       restaurant: { id: resto.id_restaurant, nom: resto.nom } 
@@ -200,31 +151,26 @@ ipcMain.handle('restaurant:add', async (event, userId, data) => {
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:delete', async (event, userId, id) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     await prisma.restaurant.delete({ 
       where: { id_restaurant: Number(id) } 
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur suppression restaurant:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:update', async (event, restaurantId, data) => {
   try {
     const updated = await prisma.restaurant.update({
       where: { id_restaurant: Number(restaurantId) },
       data,
     });
-    
     return { 
       success: true, 
       restaurant: { id: updated.id_restaurant, nom: updated.nom } 
@@ -234,21 +180,17 @@ ipcMain.handle('restaurant:update', async (event, restaurantId, data) => {
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:addProduit', async (event, userId, sectionId, produit) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const section = await prisma.sectionMenu.findUnique({
       where: { id_section: Number(sectionId) },
     });
-    
     if (!section) {
       return { success: false, error: 'Section non trouvée' };
     }
-    
     const prod = await prisma.produit.create({
       data: {
         ...produit,
@@ -257,122 +199,101 @@ ipcMain.handle('restaurant:addProduit', async (event, userId, sectionId, produit
         prix: parseFloat(produit.prix),
       },
     });
-    
     return { success: true, produit: { id: prod.id_produit, nom: prod.nom } };
   } catch (err) {
     console.error('Erreur ajout produit:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:updateProduit', async (event, userId, produitId, data) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const updated = await prisma.produit.update({
       where: { id_produit: Number(produitId) },
       data: { ...data, prix: parseFloat(data.prix) },
     });
-    
     return { success: true, produit: { id: updated.id_produit, nom: updated.nom } };
   } catch (err) {
     console.error('Erreur modification produit:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:deleteProduit', async (event, userId, produitId) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     await prisma.produit.delete({ 
       where: { id_produit: Number(produitId) } 
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur suppression produit:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:addSection', async (event, userId, restaurantId, data) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const section = await prisma.sectionMenu.create({
       data: { ...data, id_restaurant: Number(restaurantId) },
     });
-    
     return { success: true, section: { id: section.id_section, nom: section.nom } };
   } catch (err) {
     console.error('Erreur ajout section:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:updateSection', async (event, userId, sectionId, data) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const updated = await prisma.sectionMenu.update({
       where: { id_section: Number(sectionId) },
       data,
     });
-    
     return { success: true, section: { id: updated.id_section, nom: updated.nom } };
   } catch (err) {
     console.error('Erreur modification section:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('restaurant:deleteSection', async (event, userId, sectionId) => {
   try {
     if (!await userHasAnyRole(userId, ['Admin', 'Cuisinier'])) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     await prisma.sectionMenu.delete({ 
       where: { id_section: Number(sectionId) } 
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur suppression section:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('commande:create', async (event, userId, payload) => {
   try {
     const { id_restaurant, produits } = payload;
-    
     if (!userId) {
       return { success: false, error: 'Utilisateur non authentifié' };
     }
-    
     const details = [];
     for (const p of produits || []) {
       const prod = await prisma.produit.findUnique({
         where: { id_produit: Number(p.id) },
       });
-      
       details.push({
         id_produit: Number(p.id),
         quantite: Number(p.quantite || 1),
         prix_unitaire: prod ? prod.prix : 0,
       });
     }
-    
     const created = await prisma.commande.create({
       data: {
         statut: 'En attente',
@@ -381,14 +302,12 @@ ipcMain.handle('commande:create', async (event, userId, payload) => {
         details_commande: { create: details },
       },
     });
-    
     return { success: true, commandeId: created.id_commande };
   } catch (err) {
     console.error('Erreur création commande:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('commande:getForClient', async (event, userId) => {
   try {
     const commandes = await prisma.commande.findMany({
@@ -400,7 +319,6 @@ ipcMain.handle('commande:getForClient', async (event, userId) => {
       },
       orderBy: { date_commande: 'desc' },
     });
-    
     return commandes.map((c: any) => ({
       id: c.id_commande,
       date: c.date_commande,
@@ -427,16 +345,13 @@ ipcMain.handle('commande:getForClient', async (event, userId) => {
     return [];
   }
 });
-
 ipcMain.handle('commande:getForCook', async (event, userId) => {
   try {
     const user = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: Number(userId) },
       include: { utilisateur_roles: { include: { role: true } } },
     });
-    
     const roleNames = (user?.utilisateur_roles || []).map((ur: any) => ur.role.nom_role);
-    
     if (roleNames.includes('Cuisinier')) {
       const commandes = await prisma.commande.findMany({
         include: {
@@ -445,7 +360,6 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
         },
         orderBy: { date_commande: 'desc' },
       });
-      
       return commandes.map((c: any) => ({
         id: c.id_commande,
         date: c.date_commande,
@@ -464,15 +378,11 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
         })),
       }));
     }
-    
     const restos = await prisma.restaurant.findMany({
       where: { staff_restaurants: { some: { id_utilisateur: Number(userId) } } },
     });
-    
     const restoIds = restos.map(r => r.id_restaurant);
-    
     if (restoIds.length === 0) return [];
-    
     const commandes = await prisma.commande.findMany({
       where: { id_restaurant: { in: restoIds } },
       include: {
@@ -481,7 +391,6 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
       },
       orderBy: { date_commande: 'desc' },
     });
-    
     return commandes.map((c: any) => ({
       id: c.id_commande,
       date: c.date_commande,
@@ -504,42 +413,34 @@ ipcMain.handle('commande:getForCook', async (event, userId) => {
     return [];
   }
 });
-
 ipcMain.handle('commande:updateStatus', async (event, userId, commandeId, statut) => {
   try {
     const cmd = await prisma.commande.findUnique({
       where: { id_commande: Number(commandeId) },
       include: { restaurant: true },
     });
-    
     if (!cmd) {
       return { success: false, error: 'Commande introuvable' };
     }
-    
     const user = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: Number(userId) },
       include: { utilisateur_roles: { include: { role: true } } },
     });
-    
     const roleNames = (user?.utilisateur_roles || []).map((ur: any) => ur.role.nom_role);
     const hasGlobal = roleNames.includes('Cuisinier');
-    
     if (!hasGlobal) {
       const userRestos = await prisma.restaurant.findMany({
         where: { staff_restaurants: { some: { id_utilisateur: Number(userId) } } },
       });
-      
       const hasAccess = userRestos.some(r => r.id_restaurant === cmd.id_restaurant);
       if (!hasAccess) {
         return { success: false, error: 'Accès non autorisé' };
       }
     }
-    
     const updated = await prisma.commande.update({
       where: { id_commande: Number(commandeId) },
       data: { statut },
     });
-    
     return { 
       success: true, 
       commande: { id: updated.id_commande, statut: updated.statut } 
@@ -549,41 +450,24 @@ ipcMain.handle('commande:updateStatus', async (event, userId, commandeId, statut
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('livraison:getForLivreur', async (event, userId) => {
   try {
-    // Si userId est null ou undefined, récupérer toutes les livraisons (pour admin)
-    const whereClause = userId ? { id_livreur: Number(userId) } : {};
-    
     const livraisons = await prisma.livraison.findMany({
-      where: whereClause,
+      where: { id_livreur: Number(userId) },
       include: { 
         commande: {
           include: {
             restaurant: true,
             client: true,
           }
-        },
-        livreur: {
-          select: {
-            prenom: true,
-            nom: true,
-            email: true,
-          }
-        }
+        } 
       },
       orderBy: { heure_acceptation: 'desc' },
     });
-    
     return livraisons.map((l: any) => ({
       id: l.id_livraison,
       statut: l.statut_livraison,
       commandeId: l.id_commande,
-      livreur: l.livreur ? {
-        prenom: l.livreur.prenom,
-        nom: l.livreur.nom,
-        email: l.livreur.email,
-      } : null,
       commande: l.commande ? {
         id: l.commande.id_commande,
         restaurant: l.commande.restaurant ? {
@@ -601,13 +485,12 @@ ipcMain.handle('livraison:getForLivreur', async (event, userId) => {
     return [];
   }
 });
-
 ipcMain.handle('livraison:getAvailableCommandes', async () => {
   try {
     const commandes = await prisma.commande.findMany({
       where: {
         statut: 'Prête',
-        livraison: null,
+        livraison: null, // Pas encore de livraison assignée
       },
       include: {
         details_commande: { include: { produit: true } },
@@ -616,7 +499,6 @@ ipcMain.handle('livraison:getAvailableCommandes', async () => {
       },
       orderBy: { date_commande: 'desc' },
     });
-    
     return commandes.map((c: any) => ({
       id: c.id_commande,
       date: c.date_commande,
@@ -642,26 +524,21 @@ ipcMain.handle('livraison:getAvailableCommandes', async () => {
     return [];
   }
 });
-
 ipcMain.handle('livraison:create', async (event, userId, commandeId) => {
   try {
     const cmd = await prisma.commande.findUnique({
       where: { id_commande: Number(commandeId) },
       include: { livraison: true },
     });
-    
     if (!cmd) {
       return { success: false, error: 'Commande introuvable' };
     }
-    
     if (cmd.livraison) {
       return { success: false, error: 'Livraison déjà assignée' };
     }
-    
     if (cmd.statut !== 'Prête') {
       return { success: false, error: 'Commande pas prête pour livraison' };
     }
-    
     const created = await prisma.livraison.create({
       data: {
         id_commande: Number(commandeId),
@@ -670,33 +547,27 @@ ipcMain.handle('livraison:create', async (event, userId, commandeId) => {
         heure_acceptation: new Date(),
       },
     });
-    
     await prisma.commande.update({
       where: { id_commande: Number(commandeId) },
       data: { statut: 'En cours' },
     });
-    
     return { success: true, livraisonId: created.id_livraison };
   } catch (err) {
     console.error('Erreur création livraison:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('livraison:updateStatus', async (event, userId, livraisonId, statut) => {
   try {
     const liv = await prisma.livraison.findUnique({
       where: { id_livraison: Number(livraisonId) },
     });
-    
     if (!liv) {
       return { success: false, error: 'Livraison introuvable' };
     }
-    
     if (liv.id_livreur !== Number(userId)) {
       return { success: false, error: 'Accès non autorisé' };
     }
-    
     const updated = await prisma.livraison.update({
       where: { id_livraison: Number(livraisonId) },
       data: {
@@ -704,14 +575,12 @@ ipcMain.handle('livraison:updateStatus', async (event, userId, livraisonId, stat
         heure_livraison_effective: statut === 'Livrée' ? new Date() : undefined,
       },
     });
-    
     if (statut === 'Livrée') {
       await prisma.commande.update({
         where: { id_commande: liv.id_commande },
         data: { statut: 'Livrée' },
       });
     }
-    
     return { 
       success: true, 
       livraison: { id: updated.id_livraison, statut: updated.statut_livraison } 
@@ -721,13 +590,11 @@ ipcMain.handle('livraison:updateStatus', async (event, userId, livraisonId, stat
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('admin:getRoles', async () => {
   try {
     const roles = await prisma.role.findMany({ 
       orderBy: { id_role: 'asc' } 
     });
-    
     return roles.map((r: any) => ({ 
       id: r.id_role, 
       nom: r.nom_role 
@@ -737,13 +604,11 @@ ipcMain.handle('admin:getRoles', async () => {
     return [];
   }
 });
-
 ipcMain.handle('admin:getUsers', async () => {
   try {
     const users = await prisma.utilisateur.findMany({
       include: { utilisateur_roles: { include: { role: true } } },
     });
-    
     return users.map((u: any) => ({
       id: u.id_utilisateur,
       nom: u.nom,
@@ -756,31 +621,26 @@ ipcMain.handle('admin:getUsers', async () => {
     return [];
   }
 });
-
 ipcMain.handle('admin:setRoles', async (event, userId, roleNames) => {
   try {
     const roles = await prisma.role.findMany({
       where: { nom_role: { in: roleNames } },
     });
-    
     await prisma.utilisateurRole.deleteMany({
       where: { id_utilisateur: Number(userId) },
     });
-    
     await prisma.utilisateurRole.createMany({
       data: roles.map((r: any) => ({
         id_utilisateur: Number(userId),
         id_role: r.id_role,
       })),
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur attribution rôles:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('admin:addStaffToRestaurant', async (event, staffUserId, restaurantId) => {
   try {
     await prisma.staffRestaurant.create({
@@ -789,14 +649,12 @@ ipcMain.handle('admin:addStaffToRestaurant', async (event, staffUserId, restaura
         id_restaurant: Number(restaurantId),
       },
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur rattachement staff:', err);
     return { success: false, error: err.message };
   }
 });
-
 ipcMain.handle('admin:removeStaffFromRestaurant', async (event, staffUserId, restaurantId) => {
   try {
     await prisma.staffRestaurant.delete({
@@ -807,63 +665,19 @@ ipcMain.handle('admin:removeStaffFromRestaurant', async (event, staffUserId, res
         },
       },
     });
-    
     return { success: true };
   } catch (err) {
     console.error('Erreur détachement staff:', err);
     return { success: false, error: err.message };
   }
 });
-
-ipcMain.handle('admin:getAllCommandes', async () => {
-  return adminController.getAllCommandes();
-});
-
-ipcMain.handle('admin:createRestaurant', async (event, data) => {
-  return adminController.createRestaurant(data);
-});
-
-ipcMain.handle('admin:deleteRestaurant', async (event, restaurantId) => {
-  return adminController.deleteRestaurant(restaurantId);
-});
-
-ipcMain.handle('admin:updateRestaurant', async (event, restaurantId, data) => {
-  return adminController.updateRestaurant(restaurantId, data);
-});
-
-ipcMain.handle('admin:createSection', async (event, restaurantId, data) => {
-  return adminController.createSection(restaurantId, data);
-});
-
-ipcMain.handle('admin:updateSection', async (event, sectionId, data) => {
-  return adminController.updateSection(sectionId, data);
-});
-
-ipcMain.handle('admin:deleteSection', async (event, sectionId) => {
-  return adminController.deleteSection(sectionId);
-});
-
-ipcMain.handle('admin:createProduit', async (event, sectionId, data) => {
-  return adminController.createProduit(sectionId, data);
-});
-
-ipcMain.handle('admin:updateProduit', async (event, produitId, data) => {
-  return adminController.updateProduit(produitId, data);
-});
-
-ipcMain.handle('admin:deleteProduit', async (event, produitId) => {
-  return adminController.deleteProduit(produitId);
-});
-
 ipcMain.handle('user:getProfile', async (event, userId) => {
   try {
     const user = await prisma.utilisateur.findUnique({
       where: { id_utilisateur: Number(userId) },
       include: { utilisateur_roles: { include: { role: true } } },
     });
-    
     if (!user) return null;
-    
     return {
       id: user.id_utilisateur,
       prenom: user.prenom,
@@ -876,7 +690,6 @@ ipcMain.handle('user:getProfile', async (event, userId) => {
     return null;
   }
 });
-
 ipcMain.handle('cook:getRestaurants', async (event, userId) => {
   try {
     const restos = await prisma.restaurant.findMany({
@@ -886,7 +699,6 @@ ipcMain.handle('cook:getRestaurants', async (event, userId) => {
         } 
       },
     });
-    
     return restos.map((r: any) => ({
       id: r.id_restaurant,
       nom: r.nom,
@@ -898,5 +710,4 @@ ipcMain.handle('cook:getRestaurants', async (event, userId) => {
     return [];
   }
 });
-
 export {};

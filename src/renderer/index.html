@@ -1,26 +1,312 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Connexion - App de Livraison</title>
-    <meta http-equiv="Content-Security-Policy" content="script-src 'self' 'unsafe-inline';">
-    <link rel="stylesheet" href="./index.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:;">
+    <title>Connextion - App de Livraison</title>
+    <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <div class="container">
-        <h2>Connexion</h2>
-        <form id="login-form">
-            <input type="email" id="login-email" placeholder="Email" required>
-            <input type="password" id="login-password" placeholder="Mot de passe" required>
-            <button type="submit">Se connecter</button>
-        </form>
-        <div class="toggle-link">
-            Pas de compte ? <a href="register.html" id="show-register">S'inscrire</a>
+    <!-- ============================================================ -->
+    <!-- NAVIGATION - Barre de navigation (cachée à la connexion) -->
+    <!-- ============================================================ -->
+    <nav id="nav-bar" style="display:none; background:#333; color:#fff; padding:1rem;">
+        <div style="display:flex; gap:1rem; align-items:center;">
+            <span id="nav-welcome" style="margin-right:auto; font-weight:bold;"></span>
+            <button id="nav-restaurants" class="nav-btn">Restaurants</button>
+            <button id="nav-commandes" class="nav-btn" style="display:none;">Mes Commandes</button>
+            <button id="nav-cook" class="nav-btn" style="display:none;">Cuisinier</button>
+            <button id="nav-livreur" class="nav-btn" style="display:none;">Livreur</button>
+            <button id="nav-admin" class="nav-btn" style="display:none;">Admin</button>
+            <button id="nav-logout" class="btn-danger">Déconnexion</button>
         </div>
-        <div id="login-message" class="message"></div>
+    </nav>
+
+    <!-- ============================================================ -->
+    <!-- VUE: CONNEXION / INSCRIPTION -->
+    <!-- ============================================================ -->
+    <div id="view-login" class="view" style="display:block;">
+        <div style="max-width:400px; margin:3rem auto; padding:2rem; border:1px solid #ddd; border-radius:8px;">
+            <h1 style="text-align:center;">🍔 Connextion</h1>
+            <p style="text-align:center; color:#666;">Plateforme de livraison de repas</p>
+            
+            <!-- Formulaire de connexion -->
+            <div id="login-form">
+                <h2>Connexion</h2>
+                <input type="email" id="login-email" name="email" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required autofocus style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <input type="password" id="login-password" name="password" placeholder="Mot de passe" autocomplete="off" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <button id="login-submit" class="btn" style="width:100%; margin-top:1rem;">Se connecter</button>
+                <p style="text-align:center; margin-top:1rem;">
+                    Pas de compte ? <a href="#" id="show-register">S'inscrire</a>
+                </p>
+            </div>
+            
+            <!-- Formulaire d'inscription -->
+            <div id="register-form" style="display:none;">
+                <h2>Inscription</h2>
+                <input type="text" id="register-prenom" name="prenom" placeholder="Prénom" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <input type="text" id="register-nom" name="nom" placeholder="Nom" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <input type="email" id="register-email" name="reg-email" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <input type="password" id="register-password" name="reg-password" placeholder="Mot de passe" autocomplete="off" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
+                <button id="register-submit" class="btn" style="width:100%; margin-top:1rem;">Créer mon compte</button>
+                <p style="text-align:center; margin-top:1rem;">
+                    Déjà un compte ? <a href="#" id="show-login">Se connecter</a>
+                </p>
+            </div>
+        </div>
     </div>
-    <script src="./utils.js" defer></script>
-    <script src="./menu.js" defer></script>
-    <script src="./renderer.js" defer></script>
+
+    <!-- ============================================================ -->
+    <!-- VUE: RESTAURANTS (Client) -->
+    <!-- ============================================================ -->
+    <div id="view-restaurants" class="view" style="display:none;">
+        <div class="container" style="display:grid; grid-template-columns:1fr 350px; gap:2rem; max-width:1400px; margin:0 auto; padding:1rem;">
+            <div>
+                <h1>🍕 Restaurants disponibles</h1>
+                <div id="restaurants-list"></div>
+            </div>
+            
+            <!-- Panier -->
+            <div id="cart-section" style="position:sticky; top:1rem; height:fit-content; background:#fff; border:2px solid #4CAF50; border-radius:var(--radius); padding:1.5rem; display:none; box-shadow:var(--shadow-lg);">
+                <h3 style="margin-top:0; margin-bottom:1rem;">🛒 Mon panier</h3>
+                <div id="cart-items"></div>
+                <button id="cart-validate" class="btn" style="width:100%; margin-top:1rem;">Commander</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VUE: MES COMMANDES (Client) -->
+    <!-- ============================================================ -->
+    <div id="view-commandes" class="view" style="display:none;">
+        <div class="container">
+            <h1>📦 Mes commandes</h1>
+            <div id="commandes-list"></div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VUE: CUISINIER (Gestion des commandes) -->
+    <!-- ============================================================ -->
+    <div id="view-cook" class="view" style="display:none;">
+        <div class="container">
+            <h1>👨‍🍳 Interface Cuisinier</h1>
+            
+            <!-- Mes restaurants -->
+            <div style="margin-bottom:2rem;">
+                <h2>Mes restaurants</h2>
+                <div id="cook-restaurants"></div>
+            </div>
+            
+            <!-- Commandes à préparer -->
+            <div>
+                <h2>Commandes à préparer</h2>
+                <button id="cook-refresh" class="btn">🔄 Rafraîchir</button>
+                <div id="cook-commandes"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VUE: LIVREUR (Gestion des livraisons) -->
+    <!-- ============================================================ -->
+    <div id="view-livreur" class="view" style="display:none;">
+        <div class="container">
+            <h1>🚚 Interface Livreur</h1>
+            
+            <!-- Mes livraisons -->
+            <div style="margin-bottom:2rem;">
+                <h2>Mes livraisons en cours</h2>
+                <button id="livreur-refresh" class="btn">🔄 Rafraîchir</button>
+                <div id="livreur-livraisons"></div>
+            </div>
+            
+            <!-- Commandes disponibles -->
+            <div>
+                <h2>Commandes disponibles</h2>
+                <div id="livreur-available"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- VUE: ADMIN (Gestion utilisateurs et rôles) -->
+    <!-- ============================================================ -->
+    <div id="view-admin" class="view" style="display:none;">
+        <div style="max-width:1400px; margin:2rem auto; padding:0 1rem;">
+            <h1 style="text-align:center; margin-bottom:2rem;">⚙️ Administration</h1>
+            
+            <!-- Cartes de statistiques -->
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon">👥</div>
+                    <div class="admin-stat-label">Utilisateurs</div>
+                    <div class="admin-stat-value" id="stat-users">0</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon">🍴</div>
+                    <div class="admin-stat-label">Restaurants</div>
+                    <div class="admin-stat-value" id="stat-restaurants">0</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon">👨‍🍳</div>
+                    <div class="admin-stat-label">Cuisiniers</div>
+                    <div class="admin-stat-value" id="stat-cooks">0</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="admin-stat-icon">🚚</div>
+                    <div class="admin-stat-label">Livreurs</div>
+                    <div class="admin-stat-value" id="stat-drivers">0</div>
+                </div>
+            </div>
+            
+            <!-- Onglets de navigation admin -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="users">👥 Utilisateurs</button>
+                <button class="admin-tab" data-tab="commandes">📦 Commandes</button>
+                <button class="admin-tab" data-tab="restaurants">🏪 Restaurants</button>
+            </div>
+            
+            <!-- Onglet: Utilisateurs -->
+            <div id="admin-tab-users" class="admin-tab-content active">
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>👥 Gestion des utilisateurs</h2>
+                        <button id="admin-refresh" class="btn btn-sm">🔄 Actualiser</button>
+                    </div>
+                    
+                    <!-- Filtres par rôle -->
+                    <div class="admin-role-filters">
+                        <button class="role-filter-btn active" data-filter="all">📋 Tous</button>
+                        <button class="role-filter-btn" data-filter="Client">🛒 Clients</button>
+                        <button class="role-filter-btn" data-filter="Livreur">🚚 Livreurs</button>
+                        <button class="role-filter-btn" data-filter="Cuisinier">👨‍🍳 Cuisiniers</button>
+                        <button class="role-filter-btn" data-filter="Restaurant">🏪 Restaurants</button>
+                        <button class="role-filter-btn" data-filter="Admin">⚙️ Admins</button>
+                    </div>
+                    
+                    <div id="admin-users" class="admin-users-grid"></div>
+                </div>
+                
+                <!-- Gestion des rattachements -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem;">
+                    <div class="admin-section">
+                        <div class="admin-section-header">
+                            <h3>➕ Rattacher un cuisinier</h3>
+                        </div>
+                        <div style="padding:1.5rem;">
+                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Cuisinier</label>
+                            <select id="admin-attach-user" style="width:100%; margin-bottom:1rem;"></select>
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Restaurant</label>
+                            <select id="admin-attach-restaurant" style="width:100%; margin-bottom:1rem;"></select>
+                            
+                            <button id="admin-attach-btn" class="btn btn-success btn-block">✓ Rattacher</button>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-section">
+                        <div class="admin-section-header">
+                            <h3>➖ Détacher un cuisinier</h3>
+                        </div>
+                        <div style="padding:1.5rem;">
+                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Cuisinier</label>
+                            <select id="admin-detach-user" style="width:100%; margin-bottom:1rem;"></select>
+                            
+                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Restaurant</label>
+                            <select id="admin-detach-restaurant" style="width:100%; margin-bottom:1rem;"></select>
+                            
+                            <button id="admin-detach-btn" class="btn btn-danger btn-block">✗ Détacher</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Onglet: Commandes -->
+            <div id="admin-tab-commandes" class="admin-tab-content">
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>📦 Toutes les commandes</h2>
+                        <button id="admin-commandes-refresh" class="btn btn-sm">🔄 Actualiser</button>
+                    </div>
+                    <div id="admin-commandes-list" style="padding:1.5rem;"></div>
+                </div>
+            </div>
+            
+            <!-- Onglet: Restaurants -->
+            <div id="admin-tab-restaurants" class="admin-tab-content">
+                <div class="admin-section">
+                    <div class="admin-section-header">
+                        <h2>🏪 Gestion des restaurants</h2>
+                        <button id="admin-restaurant-add" class="btn btn-sm btn-success">➕ Nouveau restaurant</button>
+                    </div>
+                    <div id="admin-restaurants-list" style="padding:1.5rem;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour ajouter/modifier un restaurant -->
+    <div id="restaurant-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+        <div style="background:white; padding:2rem; border-radius:var(--radius); max-width:500px; width:90%;">
+            <h2 id="restaurant-modal-title" style="margin-bottom:1.5rem;">Nouveau restaurant</h2>
+            <input type="text" id="restaurant-nom" placeholder="Nom du restaurant" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+            <input type="text" id="restaurant-adresse" placeholder="Adresse" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+            <input type="text" id="restaurant-telephone" placeholder="Téléphone" autocomplete="off" style="width:100%; margin-bottom:1.5rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+            <div style="display:flex; gap:1rem;">
+                <button id="restaurant-modal-save" class="btn btn-success" style="flex:1;">✓ Enregistrer</button>
+                <button id="restaurant-modal-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour gérer le menu d'un restaurant -->
+    <div id="menu-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; overflow-y:auto;">
+        <div style="background:white; padding:2rem; border-radius:var(--radius); max-width:900px; width:90%; max-height:90vh; overflow-y:auto; margin:2rem auto;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                <h2 id="menu-modal-title" style="margin:0;">Gestion du menu</h2>
+                <button id="menu-modal-close" class="btn btn-secondary">✗ Fermer</button>
+            </div>
+            
+            <!-- Sections du menu -->
+            <div style="margin-bottom:2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h3 style="margin:0;">📋 Sections</h3>
+                    <button id="menu-add-section" class="btn btn-sm btn-success">➕ Nouvelle section</button>
+                </div>
+                <div id="menu-sections-list" style="display:grid; gap:1rem;"></div>
+            </div>
+            
+            <!-- Formulaire pour ajouter une section -->
+            <div id="menu-section-form" style="display:none; background:#f8f9fa; padding:1.5rem; border-radius:var(--radius); margin-bottom:2rem;">
+                <h4 style="margin-top:0;">Nouvelle section</h4>
+                <input type="text" id="menu-section-nom" placeholder="Nom de la section (ex: Entrées, Plats...)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+                <textarea id="menu-section-description" placeholder="Description (optionnel)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px; resize:vertical; min-height:80px;"></textarea>
+                <div style="display:flex; gap:1rem;">
+                    <button id="menu-section-save" class="btn btn-success" style="flex:1;">✓ Ajouter</button>
+                    <button id="menu-section-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+                </div>
+            </div>
+            
+            <!-- Formulaire pour ajouter un produit -->
+            <div id="menu-produit-form" style="display:none; background:#f8f9fa; padding:1.5rem; border-radius:var(--radius); margin-bottom:2rem;">
+                <h4 style="margin-top:0;">Nouveau produit</h4>
+                <select id="menu-produit-section" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+                    <option value="">-- Sélectionner une section --</option>
+                </select>
+                <input type="text" id="menu-produit-nom" placeholder="Nom du produit" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+                <textarea id="menu-produit-description" placeholder="Description (optionnel)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px; resize:vertical; min-height:80px;"></textarea>
+                <input type="number" id="menu-produit-prix" placeholder="Prix (€)" step="0.01" min="0" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+                <div style="display:flex; gap:1rem;">
+                    <button id="menu-produit-save" class="btn btn-success" style="flex:1;">✓ Ajouter</button>
+                    <button id="menu-produit-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script TypeScript compilé -->
+    <script src="renderer.js"></script>
 </body>
 </html>

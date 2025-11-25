@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
@@ -50,7 +50,7 @@ async function main(): Promise<void> {
     throw new Error('Admin role not found');
   }
 
-  await prisma.utilisateur.upsert({
+  const admin = await prisma.utilisateur.upsert({
     where: { email: adminEmail },
     update: {},
     create: {
@@ -63,9 +63,61 @@ async function main(): Promise<void> {
       disponibilite: null,
       position_lat: null,
       position_lon: null,
-      roles: {
-        connect: [{ id_role: adminRole.id_role }],
+    },
+  });
+
+  await prisma.utilisateurRole.upsert({
+    where: {
+      id_utilisateur_id_role: {
+        id_utilisateur: admin.id_utilisateur,
+        id_role: adminRole.id_role,
       },
+    },
+    update: {},
+    create: {
+      id_utilisateur: admin.id_utilisateur,
+      id_role: adminRole.id_role,
+    },
+  });
+
+  console.log('Seeding default delivery driver...');
+  const livreurEmail = 'livreur@gmail.com';
+  const livreurPassword = 'livreur';
+  const livreurHash = await bcrypt.hash(livreurPassword, 10);
+
+  const livreurRole = await prisma.role.findUnique({ where: { nom_role: 'Livreur' } });
+
+  if (!livreurRole) {
+    throw new Error('Livreur role not found');
+  }
+
+  const livreur = await prisma.utilisateur.upsert({
+    where: { email: livreurEmail },
+    update: {},
+    create: {
+      nom: 'Dupont',
+      prenom: 'Jean',
+      email: livreurEmail,
+      mot_de_passe_hash: livreurHash,
+      telephone: '0612345678',
+      adresse_livraison_default: null,
+      disponibilite: 'disponible',
+      position_lat: 48.8566,
+      position_lon: 2.3522,
+    },
+  });
+
+  await prisma.utilisateurRole.upsert({
+    where: {
+      id_utilisateur_id_role: {
+        id_utilisateur: livreur.id_utilisateur,
+        id_role: livreurRole.id_role,
+      },
+    },
+    update: {},
+    create: {
+      id_utilisateur: livreur.id_utilisateur,
+      id_role: livreurRole.id_role,
     },
   });
 
@@ -222,6 +274,61 @@ async function main(): Promise<void> {
   }
 
   console.log('Seeding complete.');
+
+  // Seed a default cook user and assign to a restaurant for testing
+  console.log("Seeding default cook user and assigning to 'Le Gourmet'...");
+  const cookEmail = 'cuisinier@gmail.com';
+  const cookPassword = 'cuisinier';
+  const cookHash = await bcrypt.hash(cookPassword, 10);
+  const cookRole = await prisma.role.findUnique({ where: { nom_role: 'Cuisinier' } });
+  const restoLeGourmet = await prisma.restaurant.findFirst({ where: { nom: 'Le Gourmet' } });
+  if (cookRole) {
+    const cookUser = await prisma.utilisateur.upsert({
+      where: { email: cookEmail },
+      update: {},
+      create: {
+        nom: 'Cuisinier',
+        prenom: 'Chef',
+        email: cookEmail,
+        mot_de_passe_hash: cookHash,
+        telephone: null,
+        adresse_livraison_default: null,
+        disponibilite: null,
+        position_lat: null,
+        position_lon: null,
+      },
+    });
+    
+    await prisma.utilisateurRole.upsert({
+      where: {
+        id_utilisateur_id_role: {
+          id_utilisateur: cookUser.id_utilisateur,
+          id_role: cookRole.id_role,
+        },
+      },
+      update: {},
+      create: {
+        id_utilisateur: cookUser.id_utilisateur,
+        id_role: cookRole.id_role,
+      },
+    });
+    
+    if (restoLeGourmet) {
+      await prisma.staffRestaurant.upsert({
+        where: {
+          id_utilisateur_id_restaurant: {
+            id_utilisateur: cookUser.id_utilisateur,
+            id_restaurant: restoLeGourmet.id_restaurant,
+          },
+        },
+        update: {},
+        create: {
+          id_utilisateur: cookUser.id_utilisateur,
+          id_restaurant: restoLeGourmet.id_restaurant,
+        },
+      });
+    }
+  }
 }
 
 main()

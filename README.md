@@ -2,6 +2,35 @@
 
 Application de gestion de commandes de repas avec suivi de livraison en temps réel. Construite avec **Electron**, **TypeScript**, **Node.js**, **Prisma** et **MySQL**.
 
+## ⚡ NOUVEAU : Architecture Simplifiée !
+
+Ce projet a été **radicalement simplifié** pour faciliter l'apprentissage :
+
+```
+📁 Structure minimale :
+   ├── src/main/main.ts          → TOUT LE BACKEND (1000 lignes)
+   ├── src/preload/preload.ts    → Exposition API
+   ├── src/renderer/index.html   → SPA UNIQUE
+   └── src/renderer/renderer.ts  → TOUT LE FRONTEND (900 lignes)
+
+❌ Supprimé : dossier controleurs/, fichiers HTML/TS multiples
+✅ Résultat : 4 fichiers principaux au lieu de 20+
+```
+
+**📚 [Lire le guide complet de la nouvelle architecture →](ARCHITECTURE_SIMPLIFIEE.md)**
+
+## 🗄️ Nouveau Schéma Normalisé (Boyce-Codd)
+
+Le schéma de base de données a été **refactorisé** pour suivre les normes SQL strictes:
+
+- **Tables explicites de jonction** : `utilisateur_role` et `staff_restaurant` remplacent les tables implicites Prisma
+- **Clés primaires composites** : Assure l'unicité des relations many-to-many
+- **Nommage sémantique** : Colonnes avec noms clairs (`id_utilisateur`, `id_role`) au lieu de `A`/`B`
+- **Suppression en cascade** : Maintien automatique de l'intégrité référentielle
+
+**Avant:** `_effectuerrole` (table implicite avec colonnes A/B)  
+**Après:** `utilisateur_role` (table explicite avec id_utilisateur, id_role)
+
 ## 📸 Fonctionnalités
 
 - **Clients**: Parcourir restaurants, commander des repas, payer
@@ -9,7 +38,6 @@ Application de gestion de commandes de repas avec suivi de livraison en temps r�
 - **Cuisiniers**: Recevoir et préparer les commandes
 - **Livreurs**: Récupérer et livrer les commandes
 - **Admin**: Gérer utilisateurs et permissions
-- **Mini-jeu**: Gagner une commande gratuite en jouant à Snake
 
 ---
 
@@ -120,31 +148,35 @@ npm run dev
 
 ---
 
-## 📁 Structure du projet
+## 📁 Structure du projet (Simplifiée)
 
 ```
 app_connection-electron/
 ├── src/
-│   ├── main/              # Code Electron principal (TypeScript)
-│   │   ├── main.ts        # Point d'entrée
-│   │   ├── controleurs/   # Logique métier (auth, commandes, restaurants)
-│   │   └── utilitaires/   # Helpers (Prisma, Auth)
-│   ├── renderer/          # Interface utilisateur (TypeScript)
-│   │   ├── index.html     # Page login
-│   │   ├── tableauDeBord.html   # Dashboard admin
-│   │   └── *.ts           # Logique front
-│   ├── preload/           # Pont IPC Electron
-│   └── types/             # Définitions TypeScript globales
+│   ├── main/
+│   │   ├── main.ts        # Backend unifié (IPC handlers + Prisma)
+│   │   └── utilitaires/   # Prisma client et helpers
+│   ├── renderer/
+│   │   ├── index.html     # Single Page Application (SPA unique)
+│   │   └── renderer.ts    # Frontend unifié (routing dynamique)
+│   ├── preload/
+│   │   └── preload.ts     # Pont IPC Electron
+│   └── types/
+│       └── global.d.ts    # Définitions TypeScript
 ├── prisma/
-│   ├── schema.prisma      # Schéma base de données
-│   ├── migrations/        # Historique des changements BD
-│   └── seed.ts            # Script d'insertion de données
-├── dist/                  # Code compilé (généré, .gitignored)
-├── build.ts               # Script de compilation TypeScript
-├── package.json           # Dépendances npm et scripts
-├── tsconfig.json          # Configuration TypeScript
+│   ├── schema.prisma      # Schéma normalisé Boyce-Codd
+│   ├── migrations/        # Historique (y compris refactorisation explicite)
+│   └── seed.ts            # Données de test avec jonctions explicites
+├── dist/                  # Code compilé (généré)
+├── build.ts               # Compilation TypeScript
+├── package.json           # Dépendances et scripts
 └── README.md              # Ce fichier
 ```
+
+**Évolution majeure:**
+- Anciennement: 20+ fichiers HTML/TS/Controller éparpillés
+- Maintenant: 4 fichiers principaux (main, preload, index.html, renderer)
+- Code épuré: Zéro commentaires, logique consolidée
 
 ---
 

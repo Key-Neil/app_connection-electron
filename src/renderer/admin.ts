@@ -1,3 +1,9 @@
+declare global {
+    interface Window {
+        api: any;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
     const usersDiv = document.getElementById('users');
     usersDiv.innerText = 'Chargement...';
@@ -103,3 +109,5 @@ document.addEventListener('DOMContentLoaded', async () => {
         usersDiv.innerText = 'Erreur lors du chargement.';
     }
 });
+
+export {};
