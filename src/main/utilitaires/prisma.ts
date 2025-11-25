@@ -1,21 +1,5 @@
+import { PrismaClient } from '@prisma/client';
 
-const { PrismaClient } = require('@prisma/client');
-let prisma;
-function getPrismaClient() {
-  if (!prisma) {
-    prisma = new PrismaClient();
-  }
-  return prisma;
-}
-async function disconnectPrisma() {
-  if (prisma) {
-    await prisma.$disconnect();
-  }
-}
-module.exports = {
-  getPrismaClient,
-  disconnectPrisma,
-};
+const prisma = new PrismaClient();
 
-export {};
-
+export default prisma;

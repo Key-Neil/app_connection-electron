@@ -1,5 +1,11 @@
-body, input, button, select, textarea { 
-    pointer-events: auto !important; 
+/* FIX CRITIQUE INPUTS ELECTRON */
+input, button, select, textarea, a, .clickable {
+  -webkit-app-region: no-drag !important;
+  pointer-events: auto !important;
+  z-index: 9999; /* S'assurer qu'ils sont au-dessus */
+}
+body {
+  -webkit-app-region: no-drag; /* Par défaut, rien ne bouge */
 }
 
 :root {

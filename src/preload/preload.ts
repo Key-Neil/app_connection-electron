@@ -39,13 +39,13 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('restaurant:deleteProduit', userId, produitId),
 
   addSection: (userId: number, restaurantId: number, data: any) => 
-    ipcRenderer.invoke('restaurant:addSection', userId, restaurantId, data),
+    ipcRenderer.invoke('admin:createSection', restaurantId, data),
 
-  updateSection: (userId: number, sectionId: number, data: any) => 
-    ipcRenderer.invoke('restaurant:updateSection', userId, sectionId, data),
+  updateSection: (userId: number, restaurantId: number, sectionId: number, data: any) => 
+    ipcRenderer.invoke('admin:updateSection', restaurantId, sectionId, data),
 
-  deleteSection: (userId: number, sectionId: number) => 
-    ipcRenderer.invoke('restaurant:deleteSection', userId, sectionId),
+  deleteSection: (userId: number, restaurantId: number, sectionId: number) => 
+    ipcRenderer.invoke('admin:deleteSection', restaurantId, sectionId),
 
   createCommande: (userId: number, payload: any) => 
     ipcRenderer.invoke('commande:create', userId, payload),
