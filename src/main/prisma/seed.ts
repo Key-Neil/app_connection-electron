@@ -30,11 +30,11 @@ async function main() {
   ]);
   console.log('✅ Rôles créés');
 
-  const hashedPassword = await bcrypt.hash('password123', 10);
+  const hashedPassword = await bcrypt.hash('test', 10);
 
   const admin = await prisma.utilisateur.upsert({
     where: { email: 'admin@keynect.com' },
-    update: {},
+    update: { mot_de_passe_hash: hashedPassword },
     create: {
       nom: 'Administrateur',
       prenom: 'Super',
@@ -59,7 +59,7 @@ async function main() {
 
   const cuisinier = await prisma.utilisateur.upsert({
     where: { email: 'chef@keynect.com' },
-    update: {},
+    update: { mot_de_passe_hash: hashedPassword },
     create: {
       nom: 'Dupont',
       prenom: 'Pierre',
@@ -84,7 +84,7 @@ async function main() {
 
   const livreur = await prisma.utilisateur.upsert({
     where: { email: 'livreur@keynect.com' },
-    update: {},
+    update: { mot_de_passe_hash: hashedPassword },
     create: {
       nom: 'Martin',
       prenom: 'Jean',
@@ -137,7 +137,7 @@ async function main() {
   console.log('   - Cuisinier: chef@keynect.com');
   console.log('   - Livreur: livreur@keynect.com');
   console.log('   - Client: client@keynect.com');
-  console.log('   (Mot de passe pour tous: password123)');
+  console.log('   (Mot de passe pour tous: test)');
 
   const resto1 = await prisma.restaurant.upsert({
     where: { id_restaurant: 1 },
@@ -549,10 +549,10 @@ async function main() {
   console.log('');
   console.log('📝 Comptes de test créés :');
   console.log('');
-  console.log('   🔐 Admin:      admin@keynect.com / password123');
-  console.log('   👨‍🍳 Cuisinier:  chef@keynect.com / password123');
-  console.log('   🚚 Livreur:    livreur@keynect.com / password123');
-  console.log('   👤 Client:     client@keynect.com / password123');
+  console.log('   🔐 Admin:      admin@keynect.com / test');
+  console.log('   👨‍🍳 Cuisinier:  chef@keynect.com / test');
+  console.log('   🚚 Livreur:    livreur@keynect.com / test');
+  console.log('   👤 Client:     client@keynect.com / test');
   console.log('');
   console.log('📦 Restaurants créés : 4');
   console.log('🍔 Produits créés : 60+ (avec boissons, plats, desserts)');

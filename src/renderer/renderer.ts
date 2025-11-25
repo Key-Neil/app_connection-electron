@@ -416,6 +416,7 @@ async function validateCart() {
   };
   
   const result = await (window as any).api.createCommande(currentUser.id, payload);
+  console.log('Résultat commande:', result); // Debug
   
   if (result.success) {
     alert('Commande passée avec succès !');
