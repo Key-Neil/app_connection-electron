@@ -6,7 +6,6 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Démarrage du seeding...');
 
-  // 1. Créer les rôles
   const roles = await Promise.all([
     prisma.role.upsert({
       where: { id_role: 1 },
@@ -31,13 +30,13 @@ async function main() {
   ]);
   console.log('✅ Rôles créés');
 
-  // 2. Créer un utilisateur admin
-  const hashedPassword = await bcrypt.hash('admin', 10);
+  const hashedPassword = await bcrypt.hash('password123', 10);
+
   const admin = await prisma.utilisateur.upsert({
     where: { email: 'admin@keynect.com' },
     update: {},
     create: {
-      nom: 'Admin',
+      nom: 'Administrateur',
       prenom: 'Super',
       email: 'admin@keynect.com',
       mot_de_passe_hash: hashedPassword,
@@ -57,15 +56,95 @@ async function main() {
       id_role: 4,
     },
   });
-  console.log('✅ Admin créé (admin@keynect.com / admin)');
 
-  // 3. Créer des restaurants de démonstration
+  const cuisinier = await prisma.utilisateur.upsert({
+    where: { email: 'chef@keynect.com' },
+    update: {},
+    create: {
+      nom: 'Dupont',
+      prenom: 'Pierre',
+      email: 'chef@keynect.com',
+      mot_de_passe_hash: hashedPassword,
+    },
+  });
+  
+  await prisma.utilisateurRole.upsert({
+    where: {
+      id_utilisateur_id_role: {
+        id_utilisateur: cuisinier.id_utilisateur,
+        id_role: 2, // Cuisinier
+      },
+    },
+    update: {},
+    create: {
+      id_utilisateur: cuisinier.id_utilisateur,
+      id_role: 2,
+    },
+  });
+
+  const livreur = await prisma.utilisateur.upsert({
+    where: { email: 'livreur@keynect.com' },
+    update: {},
+    create: {
+      nom: 'Martin',
+      prenom: 'Jean',
+      email: 'livreur@keynect.com',
+      mot_de_passe_hash: hashedPassword,
+    },
+  });
+  
+  await prisma.utilisateurRole.upsert({
+    where: {
+      id_utilisateur_id_role: {
+        id_utilisateur: livreur.id_utilisateur,
+        id_role: 3, // Livreur
+      },
+    },
+    update: {},
+    create: {
+      id_utilisateur: livreur.id_utilisateur,
+      id_role: 3,
+    },
+  });
+
+  const client = await prisma.utilisateur.upsert({
+    where: { email: 'client@keynect.com' },
+    update: {},
+    create: {
+      nom: 'Dubois',
+      prenom: 'Marie',
+      email: 'client@keynect.com',
+      mot_de_passe_hash: hashedPassword,
+    },
+  });
+  
+  await prisma.utilisateurRole.upsert({
+    where: {
+      id_utilisateur_id_role: {
+        id_utilisateur: client.id_utilisateur,
+        id_role: 1, // Client
+      },
+    },
+    update: {},
+    create: {
+      id_utilisateur: client.id_utilisateur,
+      id_role: 1,
+    },
+  });
+  
+  console.log('✅ Utilisateurs créés:');
+  console.log('   - Admin: admin@keynect.com');
+  console.log('   - Cuisinier: chef@keynect.com');
+  console.log('   - Livreur: livreur@keynect.com');
+  console.log('   - Client: client@keynect.com');
+  console.log('   (Mot de passe pour tous: password123)');
+
   const resto1 = await prisma.restaurant.upsert({
     where: { id_restaurant: 1 },
     update: {},
     create: {
       nom: 'Le Burger Royal',
-      adresse: '15 Rue de la Paix, Paris',
+      adresse: '15 Rue de la Paix, 75002 Paris',
       telephone: '01 23 45 67 89',
       latitude: 48.8566,
       longitude: 2.3522,
@@ -77,122 +156,407 @@ async function main() {
     update: {},
     create: {
       nom: 'Pizza Paradise',
-      adresse: '42 Avenue des Champs, Paris',
+      adresse: '42 Avenue des Champs-Élysées, 75008 Paris',
       telephone: '01 98 76 54 32',
       latitude: 48.8606,
       longitude: 2.3376,
     },
   });
+  
+  const resto3 = await prisma.restaurant.upsert({
+    where: { id_restaurant: 3 },
+    update: {},
+    create: {
+      nom: 'Sushi Master',
+      adresse: '8 Rue du Temple, 75004 Paris',
+      telephone: '01 42 55 66 77',
+      latitude: 48.8584,
+      longitude: 2.3529,
+    },
+  });
+  
+  const resto4 = await prisma.restaurant.upsert({
+    where: { id_restaurant: 4 },
+    update: {},
+    create: {
+      nom: 'Le Bistrot Parisien',
+      adresse: '25 Boulevard Saint-Germain, 75005 Paris',
+      telephone: '01 43 26 88 99',
+      latitude: 48.8534,
+      longitude: 2.3488,
+    },
+  });
+  
   console.log('✅ Restaurants créés');
 
-  // 4. Créer des sections de menu pour Le Burger Royal
-  const section1 = await prisma.sectionMenu.upsert({
-    where: { id_section: 1 },
+  await prisma.staffRestaurant.upsert({
+    where: {
+      id_utilisateur_id_restaurant: {
+        id_utilisateur: cuisinier.id_utilisateur,
+        id_restaurant: resto1.id_restaurant,
+      },
+    },
     update: {},
     create: {
-      nom: 'Burgers',
-      description: 'Nos délicieux burgers faits maison',
-      ordre: 1,
+      id_utilisateur: cuisinier.id_utilisateur,
       id_restaurant: resto1.id_restaurant,
     },
   });
-
-  const section2 = await prisma.sectionMenu.upsert({
-    where: { id_section: 2 },
-    update: {},
-    create: {
-      nom: 'Accompagnements',
-      description: 'Pour compléter votre repas',
-      ordre: 2,
-      id_restaurant: resto1.id_restaurant,
+  
+  await prisma.staffRestaurant.upsert({
+    where: {
+      id_utilisateur_id_restaurant: {
+        id_utilisateur: cuisinier.id_utilisateur,
+        id_restaurant: resto2.id_restaurant,
+      },
     },
-  });
-
-  const section3 = await prisma.sectionMenu.upsert({
-    where: { id_section: 3 },
     update: {},
     create: {
-      nom: 'Pizzas',
-      description: 'Nos pizzas artisanales',
-      ordre: 1,
+      id_utilisateur: cuisinier.id_utilisateur,
       id_restaurant: resto2.id_restaurant,
     },
   });
-  console.log('✅ Sections de menu créées');
+  
+  console.log('✅ Cuisinier lié aux restaurants');
 
-  // 5. Créer des produits
+  console.log('✅ Regroupement des produits par sections virtuelles côté front');
+
   await prisma.produit.createMany({
     data: [
-      // Burgers
+
       {
         nom: 'Classic Burger',
         prix: 8.90,
         description: 'Burger classique avec bœuf, salade, tomate, oignon',
-        id_section: section1.id_section,
         id_restaurant: resto1.id_restaurant,
       },
       {
         nom: 'Cheese Burger',
         prix: 9.90,
-        description: 'Avec cheddar fondu',
-        id_section: section1.id_section,
+        description: 'Avec double cheddar fondu',
         id_restaurant: resto1.id_restaurant,
       },
       {
         nom: 'Royal Burger',
         prix: 12.90,
-        description: 'Double viande, bacon, fromage',
-        id_section: section1.id_section,
+        description: 'Double viande, bacon, fromage, sauce royale',
         id_restaurant: resto1.id_restaurant,
       },
-      // Accompagnements
       {
-        nom: 'Frites',
+        nom: 'Veggie Burger',
+        prix: 10.50,
+        description: 'Steak végétarien, avocat, salade',
+        id_restaurant: resto1.id_restaurant,
+      },
+
+      {
+        nom: 'Frites Maison',
         prix: 3.50,
-        description: 'Frites maison croustillantes',
-        id_section: section2.id_section,
+        description: 'Frites fraîches croustillantes',
         id_restaurant: resto1.id_restaurant,
       },
       {
         nom: 'Onion Rings',
         prix: 4.50,
         description: 'Rondelles d\'oignon panées',
-        id_section: section2.id_section,
         id_restaurant: resto1.id_restaurant,
       },
-      // Pizzas
+      {
+        nom: 'Nuggets (6 pièces)',
+        prix: 5.90,
+        description: 'Nuggets de poulet croustillants',
+        id_restaurant: resto1.id_restaurant,
+      },
+
+      {
+        nom: 'Coca-Cola 33cl',
+        prix: 2.50,
+        description: 'Canette fraîche',
+        id_restaurant: resto1.id_restaurant,
+      },
+      {
+        nom: 'Sprite 33cl',
+        prix: 2.50,
+        description: 'Canette fraîche',
+        id_restaurant: resto1.id_restaurant,
+      },
+      {
+        nom: 'Fanta Orange 33cl',
+        prix: 2.50,
+        description: 'Canette fraîche',
+        id_restaurant: resto1.id_restaurant,
+      },
+      {
+        nom: 'Eau Minérale 50cl',
+        prix: 2.00,
+        description: 'Eau plate ou gazeuse',
+        id_restaurant: resto1.id_restaurant,
+      },
+      {
+        nom: 'Jus d\'Orange 25cl',
+        prix: 3.00,
+        description: 'Jus 100% pur fruit',
+        id_restaurant: resto1.id_restaurant,
+      },
+
+      {
+        nom: 'Sundae Caramel',
+        prix: 4.50,
+        description: 'Glace vanille, sauce caramel, chantilly',
+        id_restaurant: resto1.id_restaurant,
+      },
+      {
+        nom: 'Brownie Chocolat',
+        prix: 5.00,
+        description: 'Brownie maison avec glace vanille',
+        id_restaurant: resto1.id_restaurant,
+      },
+
       {
         nom: 'Margherita',
         prix: 10.00,
-        description: 'Sauce tomate, mozzarella, basilic',
-        id_section: section3.id_section,
+        description: 'Sauce tomate, mozzarella, basilic frais',
         id_restaurant: resto2.id_restaurant,
       },
       {
         nom: 'Quatre Fromages',
         prix: 12.50,
         description: 'Mozzarella, gorgonzola, parmesan, chèvre',
-        id_section: section3.id_section,
         id_restaurant: resto2.id_restaurant,
       },
       {
         nom: 'Pepperoni',
         prix: 11.50,
-        description: 'Sauce tomate, mozzarella, pepperoni',
-        id_section: section3.id_section,
+        description: 'Sauce tomate, mozzarella, pepperoni épicé',
         id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Reine',
+        prix: 11.00,
+        description: 'Jambon, champignons, mozzarella',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Calzone',
+        prix: 13.00,
+        description: 'Pizza fermée garnie jambon, champignons, œuf',
+        id_restaurant: resto2.id_restaurant,
+      },
+
+      {
+        nom: 'Spaghetti Carbonara',
+        prix: 9.50,
+        description: 'Pâtes fraîches, lardons, crème, parmesan',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Penne Arrabiata',
+        prix: 8.50,
+        description: 'Sauce tomate épicée, ail, basilic',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Lasagnes Bolognaise',
+        prix: 11.00,
+        description: 'Lasagnes maison gratinées',
+        id_restaurant: resto2.id_restaurant,
+      },
+
+      {
+        nom: 'Coca-Cola 33cl',
+        prix: 2.50,
+        description: 'Canette fraîche',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Limonade Italienne',
+        prix: 3.00,
+        description: 'Limonade artisanale',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'San Pellegrino 50cl',
+        prix: 3.50,
+        description: 'Eau pétillante italienne',
+        id_restaurant: resto2.id_restaurant,
+      },
+
+      {
+        nom: 'Tiramisu',
+        prix: 5.50,
+        description: 'Tiramisu maison au café',
+        id_restaurant: resto2.id_restaurant,
+      },
+      {
+        nom: 'Panna Cotta',
+        prix: 5.00,
+        description: 'Crème italienne aux fruits rouges',
+        id_restaurant: resto2.id_restaurant,
+      },
+
+      {
+        nom: 'Plateau Découverte (12 pièces)',
+        prix: 18.00,
+        description: 'Assortiment de sushis variés',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'Sashimi Saumon (8 pièces)',
+        prix: 15.00,
+        description: 'Tranches de saumon frais',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'California Roll (8 pièces)',
+        prix: 9.50,
+        description: 'Avocat, surimi, concombre',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'Dragon Roll (8 pièces)',
+        prix: 12.00,
+        description: 'Tempura crevette, avocat, sauce teriyaki',
+        id_restaurant: resto3.id_restaurant,
+      },
+
+      {
+        nom: 'Ramen Tonkotsu',
+        prix: 13.50,
+        description: 'Nouilles, bouillon porc, œuf mariné',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'Bento Poulet Teriyaki',
+        prix: 12.00,
+        description: 'Poulet grillé, riz, légumes, gyoza',
+        id_restaurant: resto3.id_restaurant,
+      },
+
+      {
+        nom: 'Thé Vert Matcha',
+        prix: 3.50,
+        description: 'Thé japonais traditionnel',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'Ramune',
+        prix: 3.00,
+        description: 'Soda japonais original',
+        id_restaurant: resto3.id_restaurant,
+      },
+      {
+        nom: 'Saké Chaud',
+        prix: 5.00,
+        description: 'Saké de riz traditionnel',
+        id_restaurant: resto3.id_restaurant,
+      },
+
+      {
+        nom: 'Mochi Glacé (3 pièces)',
+        prix: 6.00,
+        description: 'Glace enrobée de pâte de riz',
+        id_restaurant: resto3.id_restaurant,
+      },
+
+      {
+        nom: 'Soupe à l\'Oignon Gratinée',
+        prix: 7.50,
+        description: 'Soupe traditionnelle au fromage fondu',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Escargots de Bourgogne (6 pièces)',
+        prix: 9.00,
+        description: 'Escargots au beurre persillé',
+        id_restaurant: resto4.id_restaurant,
+      },
+
+      {
+        nom: 'Steak Frites',
+        prix: 16.50,
+        description: 'Entrecôte 250g, frites maison, salade',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Coq au Vin',
+        prix: 15.00,
+        description: 'Poulet mijoté au vin rouge, pommes vapeur',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Magret de Canard',
+        prix: 18.00,
+        description: 'Magret grillé, sauce miel, légumes',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Blanquette de Veau',
+        prix: 14.50,
+        description: 'Veau en sauce crémeuse, riz basmati',
+        id_restaurant: resto4.id_restaurant,
+      },
+
+      {
+        nom: 'Vin Rouge (25cl)',
+        prix: 5.50,
+        description: 'Côtes du Rhône',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Vin Blanc (25cl)',
+        prix: 5.50,
+        description: 'Chardonnay',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Perrier 33cl',
+        prix: 2.50,
+        description: 'Eau gazeuse',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Café Expresso',
+        prix: 2.00,
+        description: 'Café italien',
+        id_restaurant: resto4.id_restaurant,
+      },
+
+      {
+        nom: 'Crème Brûlée',
+        prix: 6.50,
+        description: 'Crème vanille caramélisée',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Tarte Tatin',
+        prix: 6.00,
+        description: 'Tarte aux pommes caramélisées',
+        id_restaurant: resto4.id_restaurant,
+      },
+      {
+        nom: 'Profiteroles',
+        prix: 7.00,
+        description: 'Choux glacés, sauce chocolat chaud',
+        id_restaurant: resto4.id_restaurant,
       },
     ],
     skipDuplicates: true,
   });
-  console.log('✅ Produits créés');
+  console.log('✅ Produits créés (60+ items avec boissons, plats et desserts)');
 
   console.log('');
   console.log('🎉 Seeding terminé avec succès !');
   console.log('');
-  console.log('📝 Compte admin :');
-  console.log('   Email: admin@keynect.com');
-  console.log('   Mot de passe: admin123');
+  console.log('📝 Comptes de test créés :');
+  console.log('');
+  console.log('   🔐 Admin:      admin@keynect.com / password123');
+  console.log('   👨‍🍳 Cuisinier:  chef@keynect.com / password123');
+  console.log('   🚚 Livreur:    livreur@keynect.com / password123');
+  console.log('   👤 Client:     client@keynect.com / password123');
+  console.log('');
+  console.log('📦 Restaurants créés : 4');
+  console.log('🍔 Produits créés : 60+ (avec boissons, plats, desserts)');
+  console.log('');
 }
 
 main()
@@ -203,3 +567,5 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
+

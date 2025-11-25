@@ -1,37 +1,18 @@
-// ============================================================
-// RENDERER.TS - FRONTEND UNIFIÉ (SPA)
-// ============================================================
-
-// ============================================================
-// ÉTAT GLOBAL - Variables partagées dans toute l'application
-// ============================================================
-
 let currentUser: any = null;
 
 let cart: Array<{ id: number; nom: string; prix: number; quantite: number; restaurantId: number }> = [];
 
 let selectedRestaurantId: number | null = null;
 
-// ============================================================
-// INITIALISATION - Gestion de l'interactivité des inputs
-// ============================================================
-
-// Fonction simplifiée pour garantir l'accès aux champs
 function ensureInputAccess() {
   const inputs = document.querySelectorAll('input, textarea, select');
   inputs.forEach((input: any) => {
-    // Ne pas toucher aux inputs qui devraient être désactivés ou lecture seule
-    // Sauf si on est sûr qu'ils ne devraient pas l'être (difficile à dire globalement)
-    
-    // On s'assure juste que le style permet l'interaction
     input.style.pointerEvents = 'auto';
     input.style.userSelect = 'text';
     input.style.webkitUserSelect = 'text';
     
-    // Fix pour Electron: parfois le drag empêche la sélection
     input.style.webkitAppRegion = 'no-drag';
     
-    // Force le focus au clic si nécessaire
     if (!input.dataset.clickAttached) {
       input.addEventListener('click', (e: any) => {
         e.stopPropagation();
@@ -41,19 +22,16 @@ function ensureInputAccess() {
     }
   });
   
-  // S'assurer que les conteneurs de modales ne sont pas draggable
   const modals = document.querySelectorAll('#restaurant-modal, #menu-modal, #restaurant-modal > div, #menu-modal > div');
   modals.forEach((modal: any) => {
     modal.style.webkitAppRegion = 'no-drag';
   });
 }
 
-// Observer les changements du DOM pour appliquer le fix aux nouveaux éléments (comme les modales)
 const observer = new MutationObserver(() => {
   ensureInputAccess();
 });
 
-// Rétrocompatibilité pour les appels existants
 (window as any).forceInputInteractivity = ensureInputAccess;
 function forceInputInteractivity() {
   ensureInputAccess();
@@ -67,79 +45,58 @@ if (typeof window !== 'undefined') {
       subtree: true
     });
   });
-  
-  // Réappliquer au focus pour être sûr
+
   window.addEventListener('focus', () => {
     ensureInputAccess();
   }, true);
 }
 
-// ============================================================
-// NAVIGATION - Gestion de l'affichage des vues (SPA)
-// ============================================================
-
-/**
- * Cache toutes les vues et affiche uniquement celle spécifiée
- */
 function showView(viewId: string) {
   const allViews = document.querySelectorAll('.view');
   allViews.forEach(view => {
     (view as HTMLElement).style.display = 'none';
   });
-  
-  // Afficher la vue demandée
+
   const targetView = document.getElementById(viewId);
   if (targetView) {
     targetView.style.display = 'block';
   }
 }
 
-/**
- * Affiche la barre de navigation et configure les boutons selon les rôles
- */
 function showNavBar() {
   const navBar = document.getElementById('nav-bar');
   if (!navBar) return;
   
   navBar.style.display = 'block';
-  
-  // Afficher le message de bienvenue
+
   const welcomeSpan = document.getElementById('nav-welcome');
   if (welcomeSpan && currentUser) {
     welcomeSpan.textContent = `Bienvenue, ${currentUser.prenom} !`;
   }
-  
-  // Afficher les boutons selon les rôles
+
   const roles = currentUser?.roles || [];
-  
-  // Bouton "Mes Commandes" pour tous les clients
+
   const navCommandes = document.getElementById('nav-commandes');
   if (navCommandes && roles.includes('Client')) {
     navCommandes.style.display = 'inline-block';
   }
-  
-  // Bouton "Cuisinier"
+
   const navCook = document.getElementById('nav-cook');
   if (navCook && roles.includes('Cuisinier')) {
     navCook.style.display = 'inline-block';
   }
-  
-  // Bouton "Livreur"
+
   const navLivreur = document.getElementById('nav-livreur');
   if (navLivreur && roles.includes('Livreur')) {
     navLivreur.style.display = 'inline-block';
   }
-  
-  // Bouton "Admin"
+
   const navAdmin = document.getElementById('nav-admin');
   if (navAdmin && roles.includes('Admin')) {
     navAdmin.style.display = 'inline-block';
   }
 }
 
-/**
- * Cache la barre de navigation
- */
 function hideNavBar() {
   const navBar = document.getElementById('nav-bar');
   if (navBar) {
@@ -147,13 +104,6 @@ function hideNavBar() {
   }
 }
 
-// ============================================================
-// AUTHENTIFICATION - Connexion et Inscription
-// ============================================================
-
-/**
- * Gère la connexion d'un utilisateur
- */
 async function handleLogin() {
   const emailInput = document.getElementById('login-email') as HTMLInputElement;
   const passwordInput = document.getElementById('login-password') as HTMLInputElement;
@@ -194,9 +144,6 @@ async function handleLogin() {
   }
 }
 
-/**
- * Gère l'inscription d'un nouvel utilisateur
- */
 async function handleRegister() {
   const prenomInput = document.getElementById('register-prenom') as HTMLInputElement;
   const nomInput = document.getElementById('register-nom') as HTMLInputElement;
@@ -248,9 +195,6 @@ async function handleRegister() {
   }
 }
 
-/**
- * Basculer entre formulaire de connexion et inscription
- */
 function toggleLoginRegister(showLogin: boolean) {
   const loginForm = document.getElementById('login-form');
   const registerForm = document.getElementById('register-form');
@@ -310,9 +254,6 @@ function toggleLoginRegister(showLogin: boolean) {
   }
 }
 
-/**
- * Déconnexion de l'utilisateur
- */
 function handleLogout() {
   currentUser = null;
   cart = [];
@@ -320,35 +261,50 @@ function handleLogout() {
   
   hideNavBar();
   showView('view-login');
-  
-  // Réinitialiser le formulaire de connexion
+
   toggleLoginRegister(true);
 }
 
-// ============================================================
-// RESTAURANTS - Affichage et sélection de produits
-// ============================================================
-
-/**
- * Charge et affiche tous les restaurants avec leurs menus
- */
 async function loadRestaurants() {
   const listDiv = document.getElementById('restaurants-list');
   if (!listDiv) return;
   
   listDiv.innerHTML = '<p>Chargement des restaurants...</p>';
-  
-  // Récupérer les restaurants depuis le backend
+
   const restaurants = await (window as any).api.getAllRestaurants();
   
   if (!restaurants || restaurants.length === 0) {
     listDiv.innerHTML = '<p>Aucun restaurant disponible.</p>';
     return;
   }
-  
-  // Afficher chaque restaurant
+
+  function computeFrontendSections(resto: any) {
+    const produits: any[] = resto.produits || [];
+    if (!produits || produits.length === 0) {
+      return [];
+    }
+
+    const groups: { [key: string]: any[] } = {};
+    const classifiers: { name: string; match: (n: string) => boolean }[] = [
+      { name: 'Burgers', match: (n) => /burger/i.test(n) },
+      { name: 'Pizzas', match: (n) => /pizza|margherita|pepperoni/i.test(n) },
+      { name: 'Accompagnements', match: (n) => /frites|onion|accompagnement/i.test(n) },
+    ];
+    produits.forEach(p => {
+      const nom = String(p.nom || '').toLowerCase();
+      const cls = classifiers.find(c => c.match(nom));
+      const key = cls ? cls.name : 'Menu';
+      groups[key] = groups[key] || [];
+      groups[key].push(p);
+    });
+    return Object.entries(groups).map(([nom, prods]) => ({ nom, produits: prods }));
+  }
+
   listDiv.innerHTML = restaurants.map((resto: any) => {
-    const sectionsHtml = (resto.sections || []).map((section: any) => {
+    const sourceSections = (resto.sections && resto.sections.length > 0)
+      ? resto.sections
+      : computeFrontendSections(resto);
+    const sectionsHtml = (sourceSections || []).map((section: any) => {
       const produitsHtml = (section.produits || []).map((produit: any) => `
         <div style="border:1px solid #ddd; padding:0.5rem; margin:0.5rem 0; border-radius:4px;">
           <strong>${produit.nom}</strong> - ${produit.prix}€
@@ -365,7 +321,7 @@ async function loadRestaurants() {
       
       return `
         <div style="margin:1rem 0;">
-          <h4>${section.nom}</h4>
+          <h4>${section.nom || 'Menu'}</h4>
           ${section.description ? `<p style="color:#666;">${section.description}</p>` : ''}
           ${produitsHtml}
         </div>
@@ -381,14 +337,10 @@ async function loadRestaurants() {
       </div>
     `;
   }).join('');
-  
-  // Attacher les événements aux boutons "Ajouter au panier"
+
   attachAddToCartEvents();
 }
 
-/**
- * Attache les événements aux boutons "Ajouter au panier"
- */
 function attachAddToCartEvents() {
   const buttons = document.querySelectorAll('.add-to-cart');
   buttons.forEach(btn => {
@@ -404,19 +356,15 @@ function attachAddToCartEvents() {
   });
 }
 
-/**
- * Ajoute un produit au panier
- */
 function addToCart(id: number, nom: string, prix: number, restaurantId: number) {
-  // Vérifier que tous les produits viennent du même restaurant
+
   if (selectedRestaurantId !== null && selectedRestaurantId !== restaurantId) {
     alert('Vous ne pouvez commander que dans un seul restaurant à la fois. Videz votre panier d\'abord.');
     return;
   }
   
   selectedRestaurantId = restaurantId;
-  
-  // Vérifier si le produit est déjà dans le panier
+
   const existingItem = cart.find(item => item.id === id);
   
   if (existingItem) {
@@ -428,9 +376,6 @@ function addToCart(id: number, nom: string, prix: number, restaurantId: number) 
   updateCartDisplay();
 }
 
-/**
- * Met à jour l'affichage du panier
- */
 function updateCartDisplay() {
   const cartSection = document.getElementById('cart-section');
   const cartItems = document.getElementById('cart-items');
@@ -460,9 +405,6 @@ function updateCartDisplay() {
   `;
 }
 
-/**
- * Valide la commande
- */
 async function validateCart() {
   if (cart.length === 0 || !selectedRestaurantId || !currentUser) {
     alert('Votre panier est vide.');
@@ -478,7 +420,7 @@ async function validateCart() {
   
   if (result.success) {
     alert('Commande passée avec succès !');
-    // Vider le panier
+
     cart = [];
     selectedRestaurantId = null;
     updateCartDisplay();
@@ -487,13 +429,6 @@ async function validateCart() {
   }
 }
 
-// ============================================================
-// COMMANDES (CLIENT) - Consultation des commandes
-// ============================================================
-
-/**
- * Charge et affiche les commandes du client
- */
 async function loadClientCommandes() {
   if (!currentUser) return;
   
@@ -527,13 +462,6 @@ async function loadClientCommandes() {
   }).join('');
 }
 
-// ============================================================
-// CUISINIER - Gestion des commandes à préparer
-// ============================================================
-
-/**
- * Charge les restaurants du cuisinier
- */
 async function loadCookRestaurants() {
   if (!currentUser) return;
   
@@ -556,9 +484,6 @@ async function loadCookRestaurants() {
   `).join('');
 }
 
-/**
- * Charge les commandes à préparer (cuisinier)
- */
 async function loadCookCommandes() {
   if (!currentUser) return;
   
@@ -595,14 +520,10 @@ async function loadCookCommandes() {
       </div>
     `;
   }).join('');
-  
-  // Attacher les événements
+
   attachCookStatusEvents();
 }
 
-/**
- * Attache les événements aux boutons de mise à jour de statut (cuisinier)
- */
 function attachCookStatusEvents() {
   const buttons = document.querySelectorAll('.cook-update-status');
   buttons.forEach(btn => {
@@ -627,13 +548,6 @@ function attachCookStatusEvents() {
   });
 }
 
-// ============================================================
-// LIVREUR - Gestion des livraisons
-// ============================================================
-
-/**
- * Charge les livraisons du livreur
- */
 async function loadLivreurLivraisons() {
   if (!currentUser) return;
   
@@ -641,8 +555,7 @@ async function loadLivreurLivraisons() {
   if (!div) return;
   
   div.innerHTML = '<p>Chargement...</p>';
-  
-  // Si admin, récupérer toutes les livraisons (sans userId), sinon uniquement celles du livreur
+
   const isAdmin = currentUser.roles && currentUser.roles.includes('Admin');
   const livraisons = await (window as any).api.getLivraisonsForLivreur(isAdmin ? null : currentUser.id);
   
@@ -660,26 +573,18 @@ async function loadLivreurLivraisons() {
       <p><strong>Adresse livraison:</strong> ${liv.commande?.restaurant?.adresse || 'N/A'}</p>
       <p><strong>Client:</strong> ${liv.commande?.client?.prenom || ''} ${liv.commande?.client?.nom || ''}</p>
       <p><strong>Statut:</strong> <span style="background:${getStatusColor(liv.statut)}; color:white; padding:0.3rem 0.8rem; border-radius:15px; font-weight:600;">${liv.statut}</span></p>
-      ${!isAdmin ? `
-        <select class="livreur-status-select" data-id="${liv.id}">
-          <option value="Acceptée" ${liv.statut === 'Acceptée' ? 'selected' : ''}>Acceptée</option>
-          <option value="En cours" ${liv.statut === 'En cours' ? 'selected' : ''}>En cours</option>
-          <option value="Livrée" ${liv.statut === 'Livrée' ? 'selected' : ''}>Livrée</option>
-        </select>
-        <button class="btn-small livreur-update-status" data-id="${liv.id}">Mettre à jour</button>
-      ` : ''}
+      <select class="livreur-status-select" data-id="${liv.id}">
+        <option value="Acceptée" ${liv.statut === 'Acceptée' ? 'selected' : ''}>Acceptée</option>
+        <option value="En cours" ${liv.statut === 'En cours' ? 'selected' : ''}>En cours</option>
+        <option value="Livrée" ${liv.statut === 'Livrée' ? 'selected' : ''}>Livrée</option>
+      </select>
+      <button class="btn-small livreur-update-status" data-id="${liv.id}">Mettre à jour</button>
     </div>
   `).join('');
-  
-  // Attacher les événements seulement si pas admin
-  if (!isAdmin) {
-    attachLivreurStatusEvents();
-  }
+
+  attachLivreurStatusEvents();
 }
 
-/**
- * Charge les commandes disponibles pour livraison
- */
 async function loadLivreurAvailableCommandes() {
   const div = document.getElementById('livreur-available');
   if (!div) return;
@@ -709,14 +614,10 @@ async function loadLivreurAvailableCommandes() {
       </div>
     `;
   }).join('');
-  
-  // Attacher les événements
+
   attachLivreurAcceptEvents();
 }
 
-/**
- * Attache les événements aux boutons de mise à jour de statut (livreur)
- */
 function attachLivreurStatusEvents() {
   const buttons = document.querySelectorAll('.livreur-update-status');
   buttons.forEach(btn => {
@@ -741,9 +642,6 @@ function attachLivreurStatusEvents() {
   });
 }
 
-/**
- * Attache les événements aux boutons "Accepter la livraison"
- */
 function attachLivreurAcceptEvents() {
   const buttons = document.querySelectorAll('.livreur-accept');
   buttons.forEach(btn => {
@@ -764,18 +662,11 @@ function attachLivreurAcceptEvents() {
   });
 }
 
-// ============================================================
-// ADMIN - Gestion des utilisateurs et rôles
-// ============================================================
-
 let currentAdminFilter = 'all';
 let allUsersData: any[] = [];
 let allRolesData: any[] = [];
 let allRestaurantsData: any[] = [];
 
-/**
- * Charge l'interface admin (utilisateurs, rôles, attachements)
- */
 async function loadAdmin() {
   const div = document.getElementById('admin-users');
   if (!div) return;
@@ -791,8 +682,7 @@ async function loadAdmin() {
   allUsersData = users;
   allRolesData = roles;
   allRestaurantsData = restaurants;
-  
-  // Mise à jour des statistiques
+
   const statUsers = document.getElementById('stat-users');
   const statRestaurants = document.getElementById('stat-restaurants');
   const statCooks = document.getElementById('stat-cooks');
@@ -802,20 +692,14 @@ async function loadAdmin() {
   if (statRestaurants) statRestaurants.textContent = restaurants.length.toString();
   if (statCooks) statCooks.textContent = users.filter((u: any) => (u.roles || []).includes('Cuisinier')).length.toString();
   if (statDrivers) statDrivers.textContent = users.filter((u: any) => (u.roles || []).includes('Livreur')).length.toString();
-  
-  // Attacher les événements de filtrage
+
   attachRoleFilterEvents();
-  
-  // Afficher les utilisateurs
+
   renderAdminUsers(currentAdminFilter);
-  
-  // Remplir les selects pour attachement/détachement
+
   populateAdminSelects(allUsersData, allRestaurantsData);
 }
 
-/**
- * Affiche les utilisateurs filtrés par rôle
- */
 function renderAdminUsers(filter: string) {
   const div = document.getElementById('admin-users');
   if (!div) return;
@@ -830,8 +714,7 @@ function renderAdminUsers(filter: string) {
     div.innerHTML = '<p style="text-align:center; padding:2rem; color:#999;">Aucun utilisateur trouvé pour ce filtre.</p>';
     return;
   }
-  
-  // Afficher les utilisateurs avec leurs rôles
+
   div.innerHTML = filteredUsers.map((u: any) => {
     const initiales = (u.prenom[0] || '') + (u.nom ? u.nom[0] : '');
     
@@ -866,35 +749,26 @@ function renderAdminUsers(filter: string) {
       </div>
     `;
   }).join('');
-  
-  // Attacher les événements aux boutons
+
   attachAdminRoleEvents();
 }
 
-/**
- * Attache les événements aux filtres de rôle
- */
 function attachRoleFilterEvents() {
   const filterButtons = document.querySelectorAll('.role-filter-btn');
   filterButtons.forEach(btn => {
     btn.addEventListener('click', (e) => {
       const target = e.target as HTMLButtonElement;
       const filter = target.dataset.filter || 'all';
-      
-      // Mettre à jour l'état actif
+
       filterButtons.forEach(b => b.classList.remove('active'));
       target.classList.add('active');
-      
-      // Mettre à jour le filtre et réafficher
+
       currentAdminFilter = filter;
       renderAdminUsers(filter);
     });
   });
 }
 
-/**
- * Attache les événements aux boutons de rôles
- */
 function attachAdminRoleEvents() {
   const buttons = document.querySelectorAll('.role-btn');
   buttons.forEach(btn => {
@@ -903,18 +777,16 @@ function attachAdminRoleEvents() {
       const userId = Number(target.dataset.user);
       const roleName = target.dataset.role || '';
       const isActive = target.dataset.active === 'true';
-      
-      // Toggle le rôle
+
       const newActiveState = !isActive;
-      
-      // Récupérer tous les rôles actuels pour cet utilisateur
+
       const userButtons = document.querySelectorAll(`.role-btn[data-user="${userId}"]`);
       const selectedRoles: string[] = [];
       
       userButtons.forEach(ub => {
         const ubtn = ub as HTMLButtonElement;
         if (ubtn.dataset.role === roleName) {
-          // Toggle ce rôle
+
           if (newActiveState) {
             selectedRoles.push(roleName);
             ubtn.classList.add('role-btn-active');
@@ -924,7 +796,7 @@ function attachAdminRoleEvents() {
             ubtn.dataset.active = 'false';
           }
         } else if (ubtn.dataset.active === 'true') {
-          // Garder les autres rôles actifs
+
           selectedRoles.push(ubtn.dataset.role || '');
         }
       });
@@ -933,7 +805,7 @@ function attachAdminRoleEvents() {
       
       if (!result || !result.success) {
         alert('Erreur lors de la mise à jour des rôles');
-        // Revert l'état visuel
+
         if (newActiveState) {
           target.classList.remove('role-btn-active');
           target.dataset.active = 'false';
@@ -946,9 +818,6 @@ function attachAdminRoleEvents() {
   });
 }
 
-/**
- * Remplit les selects d'attachement/détachement
- */
 function populateAdminSelects(users: any[], restaurants: any[]) {
   const attachUserSelect = document.getElementById('admin-attach-user') as HTMLSelectElement;
   const attachRestoSelect = document.getElementById('admin-attach-restaurant') as HTMLSelectElement;
@@ -956,8 +825,7 @@ function populateAdminSelects(users: any[], restaurants: any[]) {
   const detachRestoSelect = document.getElementById('admin-detach-restaurant') as HTMLSelectElement;
   
   if (!attachUserSelect || !attachRestoSelect || !detachUserSelect || !detachRestoSelect) return;
-  
-  // Filtrer les cuisiniers
+
   const cooks = users.filter((u: any) => (u.roles || []).includes('Cuisinier'));
   
   const cooksOptions = cooks.map((u: any) => 
@@ -974,9 +842,6 @@ function populateAdminSelects(users: any[], restaurants: any[]) {
   detachRestoSelect.innerHTML = restosOptions;
 }
 
-/**
- * Rattacher un cuisinier à un restaurant
- */
 async function handleAttachStaff() {
   const userSelect = document.getElementById('admin-attach-user') as HTMLSelectElement;
   const restoSelect = document.getElementById('admin-attach-restaurant') as HTMLSelectElement;
@@ -995,9 +860,6 @@ async function handleAttachStaff() {
   }
 }
 
-/**
- * Détacher un cuisinier d'un restaurant
- */
 async function handleDetachStaff() {
   const userSelect = document.getElementById('admin-detach-user') as HTMLSelectElement;
   const restoSelect = document.getElementById('admin-detach-restaurant') as HTMLSelectElement;
@@ -1016,9 +878,6 @@ async function handleDetachStaff() {
   }
 }
 
-/**
- * Charger toutes les commandes (admin)
- */
 async function loadAdminCommandes() {
   const div = document.getElementById('admin-commandes-list');
   if (!div) {
@@ -1089,9 +948,6 @@ async function loadAdminCommandes() {
   }
 }
 
-/**
- * Charger tous les restaurants (admin)
- */
 async function loadAdminRestaurants() {
   const div = document.getElementById('admin-restaurants-list');
   if (!div) return;
@@ -1128,9 +984,6 @@ async function loadAdminRestaurants() {
   }).join('');
 }
 
-/**
- * Modal pour ajouter un restaurant
- */
 function showAddRestaurantModal() {
   const modal = document.getElementById('restaurant-modal');
   const title = document.getElementById('restaurant-modal-title');
@@ -1146,8 +999,7 @@ function showAddRestaurantModal() {
   telephoneInput.value = '';
   
   modal.style.display = 'flex';
-  
-  // Gérer la sauvegarde
+
   const saveBtn = document.getElementById('restaurant-modal-save');
   const cancelBtn = document.getElementById('restaurant-modal-cancel');
   
@@ -1189,9 +1041,6 @@ function showAddRestaurantModal() {
   cancelBtn?.addEventListener('click', handleCancel);
 }
 
-/**
- * Modifier un restaurant
- */
 (window as any).editRestaurant = async function(restaurantId: number) {
   const restaurants = await (window as any).api.getAllRestaurants();
   const resto = restaurants.find((r: any) => r.id === restaurantId);
@@ -1258,9 +1107,6 @@ function showAddRestaurantModal() {
   cancelBtn?.addEventListener('click', handleCancel);
 };
 
-/**
- * Supprimer un restaurant
- */
 (window as any).deleteRestaurant = async function(restaurantId: number, nom: string) {
   if (!confirm(`Êtes-vous sûr de vouloir supprimer le restaurant "${nom}" ?\nCette action est irréversible.`)) {
     return;
@@ -1276,9 +1122,6 @@ function showAddRestaurantModal() {
   }
 };
 
-/**
- * Gérer le menu d'un restaurant
- */
 let currentRestaurantId: number | null = null;
 
 (window as any).manageRestaurantMenu = async function(restaurantId: number, restaurantNom: string) {
@@ -1293,8 +1136,7 @@ let currentRestaurantId: number | null = null;
   modal.style.display = 'flex';
   
   await loadRestaurantSections(restaurantId);
-  
-  // Événements
+
   document.getElementById('menu-modal-close')?.addEventListener('click', () => {
     modal.style.display = 'none';
     currentRestaurantId = null;
@@ -1303,9 +1145,6 @@ let currentRestaurantId: number | null = null;
   document.getElementById('menu-add-section')?.addEventListener('click', showSectionForm);
 };
 
-/**
- * Charger les sections d'un restaurant
- */
 async function loadRestaurantSections(restaurantId: number) {
   const listDiv = document.getElementById('menu-sections-list');
   if (!listDiv) return;
@@ -1356,9 +1195,6 @@ async function loadRestaurantSections(restaurantId: number) {
   }).join('');
 }
 
-/**
- * Afficher le formulaire d'ajout de section
- */
 function showSectionForm() {
   const form = document.getElementById('menu-section-form');
   const nomInput = document.getElementById('menu-section-nom') as HTMLInputElement;
@@ -1374,14 +1210,11 @@ function showSectionForm() {
   document.getElementById('menu-section-save')?.addEventListener('click', async () => {
     const nom = nomInput.value.trim();
     const description = descInput.value.trim();
-    
     if (!nom || !currentRestaurantId) {
       alert('Le nom de la section est obligatoire');
       return;
     }
-    
     const result = await (window as any).api.adminCreateSection(currentRestaurantId, { nom, description });
-    
     if (result.success) {
       form.style.display = 'none';
       await loadRestaurantSections(currentRestaurantId);
@@ -1390,15 +1223,39 @@ function showSectionForm() {
       alert('Erreur : ' + (result.error || ''));
     }
   });
+
+  (window as any).editSection = async function(sectionId: number) {
+    const restoId = currentRestaurantId;
+    const section = ((await (window as any).api.getAllRestaurants())
+      .find((r: any) => r.id === restoId)?.sections || []).find((s: any) => s.id === sectionId);
+    if (!section) return;
+    nomInput.value = section.nom;
+    descInput.value = section.description || '';
+    form.style.display = 'block';
+    nomInput.focus();
+    const saveBtn = document.getElementById('menu-section-save');
+    if (saveBtn) {
+      saveBtn.onclick = async () => {
+        const nom = nomInput.value.trim();
+        const description = descInput.value.trim();
+        if (!nom) return alert('Nom obligatoire');
+        const result = await (window as any).api.adminUpdateSection(restoId, sectionId, { nom, description });
+        if (result.success) {
+          form.style.display = 'none';
+          await loadRestaurantSections(restoId);
+          await loadAdminRestaurants();
+        } else {
+          alert('Erreur : ' + (result.error || ''));
+        }
+      };
+    }
+  };
   
   document.getElementById('menu-section-cancel')?.addEventListener('click', () => {
     form.style.display = 'none';
   });
 }
 
-/**
- * Afficher le formulaire d'ajout de produit
- */
 (window as any).showProduitForm = async function(sectionId: number) {
   const form = document.getElementById('menu-produit-form');
   const sectionSelect = document.getElementById('menu-produit-section') as HTMLSelectElement;
@@ -1407,8 +1264,7 @@ function showSectionForm() {
   const prixInput = document.getElementById('menu-produit-prix') as HTMLInputElement;
   
   if (!form || !sectionSelect || !nomInput || !descInput || !prixInput || !currentRestaurantId) return;
-  
-  // Charger les sections dans le select
+
   const restaurants = await (window as any).api.getAllRestaurants();
   const resto = restaurants.find((r: any) => r.id === currentRestaurantId);
   
@@ -1428,14 +1284,11 @@ function showSectionForm() {
     const nom = nomInput.value.trim();
     const description = descInput.value.trim();
     const prix = parseFloat(prixInput.value);
-    
     if (!nom || !selectedSectionId || isNaN(prix) || prix <= 0) {
       alert('Veuillez remplir tous les champs obligatoires (nom, section, prix > 0)');
       return;
     }
-    
-    const result = await (window as any).api.adminCreateProduit(selectedSectionId, { nom, description, prix });
-    
+    const result = await (window as any).api.adminAddProduit(currentRestaurantId, selectedSectionId, { nom, description, prix });
     if (result.success) {
       form.style.display = 'none';
       await loadRestaurantSections(currentRestaurantId!);
@@ -1444,19 +1297,48 @@ function showSectionForm() {
       alert('Erreur : ' + (result.error || ''));
     }
   });
+
+  (window as any).editProduit = async function(produitId: number, sectionId: number) {
+    const restoId = currentRestaurantId;
+    const section = ((await (window as any).api.getAllRestaurants())
+      .find((r: any) => r.id === restoId)?.sections || []).find((s: any) => s.id === sectionId);
+    if (!section) return;
+    const produit = (section.produits || []).find((p: any) => p.id === produitId);
+    if (!produit) return;
+    sectionSelect.value = String(sectionId);
+    nomInput.value = produit.nom;
+    descInput.value = produit.description || '';
+    prixInput.value = String(produit.prix);
+    form.style.display = 'block';
+    nomInput.focus();
+    const saveBtn = document.getElementById('menu-produit-save');
+    if (saveBtn) {
+      saveBtn.onclick = async () => {
+        const nom = nomInput.value.trim();
+        const description = descInput.value.trim();
+        const prix = parseFloat(prixInput.value);
+        if (!nom || isNaN(prix) || prix <= 0) return alert('Champs obligatoires');
+        const result = await (window as any).api.adminEditProduit(restoId, sectionId, produitId, { nom, description, prix });
+        if (result.success) {
+          form.style.display = 'none';
+          await loadRestaurantSections(restoId);
+          await loadAdminRestaurants();
+        } else {
+          alert('Erreur : ' + (result.error || ''));
+        }
+      };
+    }
+  };
   
   document.getElementById('menu-produit-cancel')?.addEventListener('click', () => {
     form.style.display = 'none';
   });
 };
 
-/**
- * Supprimer une section
- */
 (window as any).deleteSection = async function(sectionId: number) {
   if (!confirm('Supprimer cette section et tous ses produits ?')) return;
   
-  const result = await (window as any).api.adminDeleteSection(sectionId);
+  const result = await (window as any).api.adminDeleteSection(currentRestaurantId, sectionId);
   
   if (result.success && currentRestaurantId) {
     await loadRestaurantSections(currentRestaurantId);
@@ -1466,13 +1348,10 @@ function showSectionForm() {
   }
 };
 
-/**
- * Supprimer un produit
- */
 (window as any).deleteProduit = async function(produitId: number, sectionId: number) {
   if (!confirm('Supprimer ce produit ?')) return;
   
-  const result = await (window as any).api.adminDeleteProduit(produitId);
+  const result = await (window as any).api.adminDeleteProduit(currentRestaurantId, sectionId, produitId);
   
   if (result.success && currentRestaurantId) {
     await loadRestaurantSections(currentRestaurantId);
@@ -1482,13 +1361,6 @@ function showSectionForm() {
   }
 };
 
-// ============================================================
-// UTILITAIRES - Fonctions helper
-// ============================================================
-
-/**
- * Retourne une couleur selon le statut
- */
 function getStatusColor(statut: string): string {
   switch (statut) {
     case 'En attente': return '#FF9800';
@@ -1499,10 +1371,6 @@ function getStatusColor(statut: string): string {
     default: return '#666';
   }
 }
-
-// ============================================================
-// INITIALISATION - Événements au chargement de la page
-// ============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   forceInputInteractivity();
@@ -1537,13 +1405,11 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     toggleLoginRegister(true);
   });
-  
-  // Permettre connexion avec Enter
+
   document.getElementById('login-password')?.addEventListener('keypress', (e) => {
     if (e.key === 'Enter') handleLogin();
   });
-  
-  // --- NAVIGATION ---
+
   document.getElementById('nav-restaurants')?.addEventListener('click', () => {
     showView('view-restaurants');
     loadRestaurants();
@@ -1572,44 +1438,36 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   
   document.getElementById('nav-logout')?.addEventListener('click', handleLogout);
-  
-  // --- PANIER ---
+
   document.getElementById('cart-validate')?.addEventListener('click', validateCart);
-  
-  // --- CUISINIER ---
+
   document.getElementById('cook-refresh')?.addEventListener('click', loadCookCommandes);
-  
-  // --- LIVREUR ---
+
   document.getElementById('livreur-refresh')?.addEventListener('click', () => {
     loadLivreurLivraisons();
     loadLivreurAvailableCommandes();
   });
-  
-  // --- ADMIN ---
+
   document.getElementById('admin-attach-btn')?.addEventListener('click', handleAttachStaff);
   document.getElementById('admin-detach-btn')?.addEventListener('click', handleDetachStaff);
   document.getElementById('admin-refresh')?.addEventListener('click', loadAdmin);
   document.getElementById('admin-commandes-refresh')?.addEventListener('click', loadAdminCommandes);
   document.getElementById('admin-restaurant-add')?.addEventListener('click', showAddRestaurantModal);
-  
-  // Gestion des onglets admin
+
   const adminTabs = document.querySelectorAll('.admin-tab');
   adminTabs.forEach(tab => {
     tab.addEventListener('click', (e) => {
       const target = e.target as HTMLButtonElement;
       const tabName = target.dataset.tab;
-      
-      // Mettre à jour les onglets actifs
+
       adminTabs.forEach(t => t.classList.remove('active'));
       target.classList.add('active');
-      
-      // Afficher le contenu correspondant
+
       document.querySelectorAll('.admin-tab-content').forEach(content => {
         content.classList.remove('active');
       });
       document.getElementById(`admin-tab-${tabName}`)?.classList.add('active');
-      
-      // Charger les données si nécessaire
+
       if (tabName === 'commandes') {
         loadAdminCommandes();
       } else if (tabName === 'restaurants') {
@@ -1618,3 +1476,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 });
+
+

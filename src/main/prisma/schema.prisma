@@ -57,7 +57,6 @@ model Restaurant {
   latitude          Float                @default(48.8566)
   longitude         Float                @default(2.3522)
   
-  sections          SectionMenu[]
   produits          Produit[]
   staff_restaurants StaffRestaurant[]
   commandes         Commande[]
@@ -76,19 +75,6 @@ model StaffRestaurant {
   @@map("Staff_Restaurants")
 }
 
-model SectionMenu {
-  id_section    Int         @id @default(autoincrement())
-  nom           String      @db.VarChar(100)
-  description   String?     @db.Text
-  ordre         Int         @default(0)
-  id_restaurant Int
-  
-  restaurant    Restaurant  @relation(fields: [id_restaurant], references: [id_restaurant], onDelete: Cascade)
-  produits      Produit[]
-
-  @@map("Sections_Menu")
-}
-
 model Produit {
   id_produit    Int              @id @default(autoincrement())
   nom           String           @db.VarChar(100)
@@ -96,10 +82,8 @@ model Produit {
   description   String?          @db.Text
   url_photo     String?          @db.VarChar(255)
   prix_promo    Float?
-  id_section    Int
   id_restaurant Int
   
-  section            SectionMenu       @relation(fields: [id_section], references: [id_section], onDelete: Cascade)
   restaurant         Restaurant        @relation(fields: [id_restaurant], references: [id_restaurant], onDelete: Cascade)
   details_commande   DetailCommande[]
 

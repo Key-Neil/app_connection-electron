@@ -48,15 +48,6 @@ CREATE TABLE `Staff_Restaurants` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-CREATE TABLE `Sections_Menu` (
-    `id_section` INTEGER NOT NULL AUTO_INCREMENT,
-    `nom` VARCHAR(100) NOT NULL,
-    `description` TEXT NULL,
-    `ordre` INTEGER NOT NULL DEFAULT 0,
-    `id_restaurant` INTEGER NOT NULL,
-
-    PRIMARY KEY (`id_section`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `Produits` (
@@ -66,7 +57,6 @@ CREATE TABLE `Produits` (
     `description` TEXT NULL,
     `url_photo` VARCHAR(255) NULL,
     `prix_promo` DOUBLE NULL,
-    `id_section` INTEGER NOT NULL,
     `id_restaurant` INTEGER NOT NULL,
 
     PRIMARY KEY (`id_produit`)
@@ -120,10 +110,8 @@ ALTER TABLE `Staff_Restaurants` ADD CONSTRAINT `Staff_Restaurants_id_utilisateur
 ALTER TABLE `Staff_Restaurants` ADD CONSTRAINT `Staff_Restaurants_id_restaurant_fkey` FOREIGN KEY (`id_restaurant`) REFERENCES `Restaurants`(`id_restaurant`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Sections_Menu` ADD CONSTRAINT `Sections_Menu_id_restaurant_fkey` FOREIGN KEY (`id_restaurant`) REFERENCES `Restaurants`(`id_restaurant`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Produits` ADD CONSTRAINT `Produits_id_section_fkey` FOREIGN KEY (`id_section`) REFERENCES `Sections_Menu`(`id_section`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Produits` ADD CONSTRAINT `Produits_id_restaurant_fkey` FOREIGN KEY (`id_restaurant`) REFERENCES `Restaurants`(`id_restaurant`) ON DELETE CASCADE ON UPDATE CASCADE;

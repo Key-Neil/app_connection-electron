@@ -17,8 +17,6 @@ Ce projet a été **radicalement simplifié** pour faciliter l'apprentissage :
 ✅ Résultat : 4 fichiers principaux au lieu de 20+
 ```
 
-**📚 [Lire le guide complet de la nouvelle architecture →](ARCHITECTURE_SIMPLIFIEE.md)**
-
 ## 🗄️ Nouveau Schéma Normalisé (Boyce-Codd)
 
 Le schéma de base de données a été **refactorisé** pour suivre les normes SQL strictes:
@@ -155,6 +153,10 @@ app_connection-electron/
 ├── src/
 │   ├── main/
 │   │   ├── main.ts        # Backend unifié (IPC handlers + Prisma)
+│   │   ├── prisma/        # Base de données
+│   │   │   ├── schema.prisma  # Schéma normalisé Boyce-Codd
+│   │   │   ├── migrations/    # Historique
+│   │   │   └── seed.ts        # Données de test
 │   │   └── utilitaires/   # Prisma client et helpers
 │   ├── renderer/
 │   │   ├── index.html     # Single Page Application (SPA unique)
@@ -163,10 +165,6 @@ app_connection-electron/
 │   │   └── preload.ts     # Pont IPC Electron
 │   └── types/
 │       └── global.d.ts    # Définitions TypeScript
-├── prisma/
-│   ├── schema.prisma      # Schéma normalisé Boyce-Codd
-│   ├── migrations/        # Historique (y compris refactorisation explicite)
-│   └── seed.ts            # Données de test avec jonctions explicites
 ├── dist/                  # Code compilé (généré)
 ├── build.ts               # Compilation TypeScript
 ├── package.json           # Dépendances et scripts
@@ -188,7 +186,6 @@ npm start                  # Build + lance l'app Electron
 npm run dev                # Lance l'app sans recompilation
 npm run rebuild            # Recompile tout de zéro
 npm run seed               # Injecte les données de test
-npm run copy-assets        # Copie HTML/CSS vers dist/
 ```
 
 ---
@@ -226,8 +223,8 @@ npx prisma generate
 ### L'application se lance mais les pages sont blanches
 **Solution**:
 ```bash
-npm run build      # Recompile TypeScript
-npm start          # Relance l'app
+npm run build
+npm start
 ```
 
 ---
