@@ -10,9 +10,7 @@
     "start": "npm run build && electron-forge start",
     "package": "npm run build && electron-forge package",
     "make": "npm run build && electron-forge make",
-    "dev": "electron .",
-    "seed": "tsx src/main/prisma/seed.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "seed": "tsx src/main/prisma/seed.ts"
   },
   "keywords": [],
   "author": "Key_Neil",

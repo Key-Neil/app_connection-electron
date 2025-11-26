@@ -48,8 +48,6 @@ CREATE TABLE `Staff_Restaurants` (
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
-
--- CreateTable
 CREATE TABLE `Produits` (
     `id_produit` INTEGER NOT NULL AUTO_INCREMENT,
     `nom` VARCHAR(100) NOT NULL,
@@ -108,10 +106,6 @@ ALTER TABLE `Staff_Restaurants` ADD CONSTRAINT `Staff_Restaurants_id_utilisateur
 
 -- AddForeignKey
 ALTER TABLE `Staff_Restaurants` ADD CONSTRAINT `Staff_Restaurants_id_restaurant_fkey` FOREIGN KEY (`id_restaurant`) REFERENCES `Restaurants`(`id_restaurant`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-
--- AddForeignKey
 
 -- AddForeignKey
 ALTER TABLE `Produits` ADD CONSTRAINT `Produits_id_restaurant_fkey` FOREIGN KEY (`id_restaurant`) REFERENCES `Restaurants`(`id_restaurant`) ON DELETE CASCADE ON UPDATE CASCADE;

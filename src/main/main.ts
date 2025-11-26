@@ -331,10 +331,11 @@ ipcMain.handle('commande:create', async (event, userId, payload) => {
     const details = [];
     for (const p of produits || []) {
       const prod = await prisma.produit.findUnique({ where: { id_produit: Number(p.id) } });
+      const unit = prod ? (prod.prix_promo != null ? prod.prix_promo : prod.prix) : 0;
       details.push({
         id_produit: Number(p.id),
         quantite: Number(p.quantite || 1),
-        prix_unitaire: prod ? prod.prix : 0,
+        prix_unitaire: Number(unit),
       });
     }
     
@@ -373,8 +374,8 @@ ipcMain.handle('commande:getForClient', async (event, userId) => {
       restaurant: c.restaurant ? { id: c.restaurant.id_restaurant, nom: c.restaurant.nom } : null,
       details: c.details_commande.map((d: any) => ({
         produit: { id: d.id_produit, nom: null },
-        quantite: d.quantite,
-        prix_unitaire: d.prix_unitaire,
+          quantite: Number(d.quantite),
+          prix_unitaire: Number(d.prix_unitaire),
       })),
       livraison: c.livraison ? { id: c.livraison.id_livraison, statut: c.livraison.statut_livraison } : null,
     }));
@@ -620,7 +621,7 @@ ipcMain.handle('admin:getAllCommandes', async () => {
         client: { select: { prenom: true, nom: true, email: true } },
         restaurant: { select: { nom: true } },
         livraison: { include: { livreur: { select: { prenom: true, nom: true } } } },
-        details_commande: { include: { produit: { select: { nom: true, prix: true } } } },
+        details_commande: true,
       },
       orderBy: { date_commande: 'desc' },
     });
@@ -629,15 +630,15 @@ ipcMain.handle('admin:getAllCommandes', async () => {
       id: c.id_commande,
       date: c.date_commande,
       statut: c.statut,
-      total: c.details_commande.reduce((sum: number, d: any) => sum + (d.prix_unitaire * d.quantite), 0),
+      total: c.details_commande.reduce((sum: number, d: any) => sum + (Number(d.prix_unitaire) * Number(d.quantite)), 0),
       client: c.client ? `${c.client.prenom} ${c.client.nom || ''}` : 'Client inconnu',
       clientEmail: c.client?.email || '',
       restaurant: c.restaurant?.nom || 'Restaurant inconnu',
       livreur: c.livraison?.livreur ? `${c.livraison.livreur.prenom} ${c.livraison.livreur.nom || ''}` : 'Aucun',
       lignes: c.details_commande.map((l: any) => ({
-        produit: l.produit?.nom || 'Produit inconnu',
-        quantite: l.quantite,
-        prix: l.prix_unitaire,
+        produit: `Produit #${l.id_produit}`,
+        quantite: Number(l.quantite),
+        prix: Number(l.prix_unitaire),
       })),
     }));
   } catch (err) {

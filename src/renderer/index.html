@@ -8,107 +8,111 @@
     <link rel="stylesheet" href="index.css">
 </head>
 <body>
-    <nav id="nav-bar" style="display:none; background:#333; color:#fff; padding:1rem;">
-        <div style="display:flex; gap:1rem; align-items:center;">
-            <span id="nav-welcome" style="margin-right:auto; font-weight:bold;"></span>
-            <button id="nav-restaurants" class="nav-btn">Restaurants</button>
-            <button id="nav-commandes" class="nav-btn" style="display:none;">Mes Commandes</button>
-            <button id="nav-cook" class="nav-btn" style="display:none;">Cuisinier</button>
-            <button id="nav-livreur" class="nav-btn" style="display:none;">Livreur</button>
-            <button id="nav-admin" class="nav-btn" style="display:none;">Admin</button>
-            <button id="nav-logout" class="btn-danger">Déconnexion</button>
+    <nav id="nav-bar" class="d-none">
+        <div>
+            <span id="nav-welcome"></span>
+            <button id="nav-restaurants" class="nav-btn">🏪 Restaurants</button>
+            <button id="nav-commandes" class="nav-btn d-none">📦 Commandes</button>
+            <button id="nav-cook" class="nav-btn d-none">👨‍🍳 Cuisinier</button>
+            <button id="nav-livreur" class="nav-btn d-none">🚚 Livreur</button>
+            <button id="nav-admin" class="nav-btn d-none">⚙️ Admin</button>
+            <button id="nav-logout">🚪 Déconnexion</button>
         </div>
     </nav>
-    <div id="view-login" class="view" style="display:block;">
-        <div style="max-width:400px; margin:3rem auto; padding:2rem; border:1px solid #ddd; border-radius:8px;">
-            <h1 style="text-align:center;">🚀 Keynect</h1>
-            <p style="text-align:center; color:#666;">Plateforme de livraison de repas</p>
+    
+    <div id="view-login" class="view active">
+        <div class="auth-container">
+            <h1 class="auth-title">🚀 Keynect</h1>
+            <p class="auth-subtitle">Plateforme de livraison de repas</p>
             
             <div id="login-form">
                 <h2>Connexion</h2>
-                <input type="email" id="login-email" name="email" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required autofocus style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <input type="password" id="login-password" name="password" placeholder="Mot de passe" autocomplete="off" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <button id="login-submit" class="btn" style="width:100%; margin-top:1rem;">Se connecter</button>
-                <p style="text-align:center; margin-top:1rem;">
-                    Pas de compte ? <a href="#" id="show-register">S'inscrire</a>
+                <form id="login-form-el">
+                    <input type="email" id="login-email" placeholder="Email" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required autofocus>
+                    <input type="password" id="login-password" placeholder="Mot de passe" class="form-input" autocomplete="off" required>
+                    <div id="login-error" class="form-error"></div>
+                    <button type="submit" class="btn btn-block">Se connecter</button>
+                </form>
+                <p class="toggle-link">
+                    Pas de compte ? <a href="#" id="to-register-btn">S'inscrire</a>
                 </p>
             </div>
             
-            <div id="register-form" style="display:none;">
+            <div id="register-form" class="d-none">
                 <h2>Inscription</h2>
-                <input type="text" id="register-prenom" name="prenom" placeholder="Prénom" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <input type="text" id="register-nom" name="nom" placeholder="Nom" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <input type="email" id="register-email" name="reg-email" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <input type="password" id="register-password" name="reg-password" placeholder="Mot de passe" autocomplete="off" required style="width:100%; padding:0.5rem; margin:0.5rem 0;">
-                <button id="register-submit" class="btn" style="width:100%; margin-top:1rem;">Créer mon compte</button>
-                <p style="text-align:center; margin-top:1rem;">
-                    Déjà un compte ? <a href="#" id="show-login">Se connecter</a>
+                <form id="register-form-el">
+                    <input type="text" id="register-prenom" placeholder="Prénom" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                    <input type="text" id="register-nom" placeholder="Nom" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                    <input type="tel" id="register-tel" placeholder="Téléphone" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                    <input type="text" id="register-adresse" placeholder="Adresse" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                    <input type="email" id="register-email" placeholder="Email" class="form-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" required>
+                    <input type="password" id="register-password" placeholder="Mot de passe" class="form-input" autocomplete="off" required>
+                    <div id="register-error" class="form-error"></div>
+                    <button type="submit" class="btn btn-block">Créer mon compte</button>
+                </form>
+                <p class="toggle-link">
+                    Déjà un compte ? <a href="#" id="to-login-btn">Se connecter</a>
                 </p>
             </div>
         </div>
     </div>
 
-    <div id="view-restaurants" class="view" style="display:none;">
-        <div class="container" style="display:grid; grid-template-columns:1fr 350px; gap:2rem; max-width:1400px; margin:0 auto; padding:1rem;">
+    <div id="view-restaurants" class="view">
+        <div class="container restaurants-grid-container">
             <div>
                 <h1>🍕 Restaurants disponibles</h1>
                 <div id="restaurants-list"></div>
             </div>
-            
-            <div id="cart-section" style="position:sticky; top:1rem; height:fit-content; background:#fff; border:2px solid #4CAF50; border-radius:var(--radius); padding:1.5rem; display:none; box-shadow:var(--shadow-lg);">
-                <h3 style="margin-top:0; margin-bottom:1rem;">🛒 Mon panier</h3>
-                <div id="cart-items"></div>
-                <button id="cart-validate" class="btn" style="width:100%; margin-top:1rem;">Commander</button>
+            <div id="cart-section" class="cart-section d-none">
+                <h3 class="cart-title">🛒 Mon panier</h3>
+                <div id="cart-items" class="cart-items"></div>
+                <button id="validate-cart" class="btn btn-block cart-validate-btn">✓ Commander maintenant</button>
             </div>
         </div>
     </div>
 
-    <div id="view-commandes" class="view" style="display:none;">
+    <div id="view-commandes" class="view">
         <div class="container">
             <h1>📦 Mes commandes</h1>
             <div id="commandes-list"></div>
         </div>
     </div>
 
-    <div id="view-cook" class="view" style="display:none;">
+    <div id="view-cook" class="view">
         <div class="container">
             <h1>👨‍🍳 Interface Cuisinier</h1>
-            
-            <!-- Mes restaurants -->
-            <div style="margin-bottom:2rem;">
+            <div class="mb-3">
                 <h2>Mes restaurants</h2>
                 <div id="cook-restaurants"></div>
             </div>
-            
-            <!-- Commandes à préparer -->
             <div>
                 <h2>Commandes à préparer</h2>
-                <button id="cook-refresh" class="btn">🔄 Rafraîchir</button>
+                <button id="cook-refresh" class="btn mb-2">🔄 Rafraîchir</button>
                 <div id="cook-commandes"></div>
             </div>
         </div>
     </div>
-    <div id="view-livreur" class="view" style="display:none;">
+    
+    <div id="view-livreur" class="view">
         <div class="container">
             <h1>🚚 Interface Livreur</h1>
-            
-            <div style="margin-bottom:2rem;">
+            <div class="mb-3">
                 <h2>Mes livraisons en cours</h2>
-                <button id="livreur-refresh" class="btn">🔄 Rafraîchir</button>
+                <button id="livreur-refresh" class="btn mb-2">🔄 Rafraîchir</button>
                 <div id="livreur-livraisons"></div>
             </div>
-            
             <div>
                 <h2>Commandes disponibles</h2>
                 <div id="livreur-available"></div>
             </div>
         </div>
     </div>
-    <div id="view-admin" class="view" style="display:none;">
+    
+    <div id="view-admin" class="view">
         <div class="container">
-            <h1 style="text-align:center; margin-bottom:2rem;">⚙️ Administration</h1>
+            <h1>⚙️ Administration</h1>
             
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(250px, 1fr)); gap:1.5rem; margin-bottom:2rem;">
+            <div class="admin-stats-grid">
                 <div class="admin-stat-card">
                     <div class="admin-stat-icon">👥</div>
                     <div class="admin-stat-label">Utilisateurs</div>
@@ -135,7 +139,7 @@
                 <button class="admin-tab active" data-tab="users">👥 Utilisateurs</button>
                 <button class="admin-tab" data-tab="commandes">📦 Commandes</button>
                 <button class="admin-tab" data-tab="restaurants">🏪 Restaurants</button>
-                </div>
+            </div>
                 
             <div id="admin-tab-users" class="admin-tab-content active">
                 <div class="admin-section">
@@ -143,46 +147,38 @@
                         <h2>👥 Gestion des utilisateurs</h2>
                         <button id="admin-refresh" class="btn btn-sm">🔄 Actualiser</button>
                     </div>
-
                     <div class="admin-role-filters">
                         <button class="role-filter-btn active" data-filter="all">📋 Tous</button>
                         <button class="role-filter-btn" data-filter="Client">🛒 Clients</button>
                         <button class="role-filter-btn" data-filter="Livreur">🚚 Livreurs</button>
                         <button class="role-filter-btn" data-filter="Cuisinier">👨‍🍳 Cuisiniers</button>
-                        <button class="role-filter-btn" data-filter="Restaurant">🏪 Restaurants</button>
                         <button class="role-filter-btn" data-filter="Admin">⚙️ Admins</button>
                     </div>
-                    
                     <div id="admin-users" class="admin-users-grid"></div>
                 </div>
                 
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-top:2rem;">
+                <div class="admin-attach-grid">
                     <div class="admin-section">
-                        <div class="admin-section-header">
-                            <h3>➕ Rattacher un cuisinier</h3>
+                        <div class="admin-section-header admin-section-header-green">
+                            <h3>➡️ Rattacher un cuisinier</h3>
                         </div>
-                        <div style="padding:1.5rem;">
-                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Cuisinier</label>
-                            <select id="admin-attach-user" style="width:100%; margin-bottom:1rem;"></select>
-                            
-                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Restaurant</label>
-                            <select id="admin-attach-restaurant" style="width:100%; margin-bottom:1rem;"></select>
-                            
+                        <div class="p-3">
+                            <label class="form-label">Cuisinier</label>
+                            <select id="admin-attach-user" class="form-input mb-2"></select>
+                            <label class="form-label">Restaurant</label>
+                            <select id="admin-attach-restaurant" class="form-input mb-2"></select>
                             <button id="admin-attach-btn" class="btn btn-success btn-block">✓ Rattacher</button>
                         </div>
                     </div>
-                    
                     <div class="admin-section">
-                        <div class="admin-section-header">
-                            <h3>➖ Détacher un cuisinier</h3>
+                        <div class="admin-section-header admin-section-header-red">
+                            <h3>⬅️ Détacher un cuisinier</h3>
                         </div>
-                        <div style="padding:1.5rem;">
-                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Cuisinier</label>
-                            <select id="admin-detach-user" style="width:100%; margin-bottom:1rem;"></select>
-                            
-                            <label style="display:block; font-weight:600; margin-bottom:0.5rem;">Restaurant</label>
-                            <select id="admin-detach-restaurant" style="width:100%; margin-bottom:1rem;"></select>
-                            
+                        <div class="p-3">
+                            <label class="form-label">Cuisinier</label>
+                            <select id="admin-detach-user" class="form-input mb-2"></select>
+                            <label class="form-label">Restaurant</label>
+                            <select id="admin-detach-restaurant" class="form-input mb-2"></select>
                             <button id="admin-detach-btn" class="btn btn-danger btn-block">✗ Détacher</button>
                         </div>
                     </div>
@@ -195,7 +191,7 @@
                         <h2>📦 Toutes les commandes</h2>
                         <button id="admin-commandes-refresh" class="btn btn-sm">🔄 Actualiser</button>
                     </div>
-                    <div id="admin-commandes-list" style="padding:1.5rem;"></div>
+                    <div id="admin-commandes-list" class="p-3"></div>
                 </div>
             </div>
             
@@ -205,66 +201,66 @@
                         <h2>🏪 Gestion des restaurants</h2>
                         <button id="admin-restaurant-add" class="btn btn-sm btn-success">➕ Nouveau restaurant</button>
                     </div>
-                    <div id="admin-restaurants-list" style="padding:1.5rem;"></div>
+                    <div id="admin-restaurants-list" class="p-3"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="restaurant-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
-        <div style="background:white; padding:2rem; border-radius:var(--radius); max-width:500px; width:90%;">
-            <h2 id="restaurant-modal-title" style="margin-bottom:1.5rem;">Nouveau restaurant</h2>
-            <input type="text" id="restaurant-nom" placeholder="Nom du restaurant" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-            <input type="text" id="restaurant-adresse" placeholder="Adresse" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-            <input type="text" id="restaurant-telephone" placeholder="Téléphone" autocomplete="off" style="width:100%; margin-bottom:1.5rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-            <div style="display:flex; gap:1rem;">
-                <button id="restaurant-modal-save" class="btn btn-success" style="flex:1;">✓ Enregistrer</button>
-                <button id="restaurant-modal-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+    <div id="restaurant-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="restaurant-modal-title">Nouveau restaurant</h2>
+            <input type="text" id="restaurant-nom" placeholder="Nom du restaurant" autocomplete="off" class="form-input">
+            <input type="text" id="restaurant-adresse" placeholder="Adresse" autocomplete="off" class="form-input">
+            <input type="text" id="restaurant-telephone" placeholder="Téléphone" autocomplete="off" class="form-input mb-2">
+            <div class="flex gap-2">
+                <button id="restaurant-modal-save" class="btn btn-success flex-1">✓ Enregistrer</button>
+                <button id="restaurant-modal-cancel" class="btn btn-secondary flex-1">✗ Annuler</button>
             </div>
         </div>
     </div>
 
-    <div id="menu-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; overflow-y:auto;">
-        <div style="background:white; padding:2rem; border-radius:var(--radius); max-width:900px; width:90%; max-height:90vh; overflow-y:auto; margin:2rem auto;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                <h2 id="menu-modal-title" style="margin:0;">Gestion du menu</h2>
+    <div id="menu-modal" class="modal">
+        <div class="modal-content modal-content-large">
+            <div class="flex-between mb-3">
+                <h2 id="menu-modal-title">Gestion du menu</h2>
                 <button id="menu-modal-close" class="btn btn-secondary">✗ Fermer</button>
             </div>
             
-            <div style="margin-bottom:2rem;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <h3 style="margin:0;">📋 Sections</h3>
+            <div class="mb-3">
+                <div class="flex-between mb-2">
+                    <h3>📋 Sections</h3>
                     <button id="menu-add-section" class="btn btn-sm btn-success">➕ Nouvelle section</button>
                 </div>
-                <div id="menu-sections-list" style="display:grid; gap:1rem;"></div>
+                <div id="menu-sections-list"></div>
             </div>
             
-            <div id="menu-section-form" style="display:none; background:#f8f9fa; padding:1.5rem; border-radius:var(--radius); margin-bottom:2rem;">
-                <h4 style="margin-top:0;">Nouvelle section</h4>
-                <input type="text" id="menu-section-nom" placeholder="Nom de la section (ex: Entrées, Plats...)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-                <textarea id="menu-section-description" placeholder="Description (optionnel)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px; resize:vertical; min-height:80px;"></textarea>
-                <div style="display:flex; gap:1rem;">
-                    <button id="menu-section-save" class="btn btn-success" style="flex:1;">✓ Ajouter</button>
-                    <button id="menu-section-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+            <div id="menu-section-form" class="card d-none">
+                <h4>Nouvelle section</h4>
+                <input type="text" id="menu-section-nom" placeholder="Nom de la section (ex: Entrées, Plats...)" autocomplete="off" class="form-input">
+                <textarea id="menu-section-description" placeholder="Description (optionnel)" autocomplete="off" class="form-input"></textarea>
+                <div class="flex gap-2">
+                    <button id="menu-section-save" class="btn btn-success flex-1">✓ Ajouter</button>
+                    <button id="menu-section-cancel" class="btn btn-secondary flex-1">✗ Annuler</button>
                 </div>
             </div>
             
-            <div id="menu-produit-form" style="display:none; background:#f8f9fa; padding:1.5rem; border-radius:var(--radius); margin-bottom:2rem;">
-                <h4 style="margin-top:0;">Nouveau produit</h4>
-                <select id="menu-produit-section" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
+            <div id="menu-produit-form" class="card d-none">
+                <h4>Nouveau produit</h4>
+                <select id="menu-produit-section" class="form-input">
                     <option value="">-- Sélectionner une section --</option>
                 </select>
-                <input type="text" id="menu-produit-nom" placeholder="Nom du produit" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-                <textarea id="menu-produit-description" placeholder="Description (optionnel)" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px; resize:vertical; min-height:80px;"></textarea>
-                <input type="number" id="menu-produit-prix" placeholder="Prix (€)" step="0.01" min="0" autocomplete="off" style="width:100%; margin-bottom:1rem; padding:0.75rem; border:2px solid #ddd; border-radius:4px;">
-                <div style="display:flex; gap:1rem;">
-                    <button id="menu-produit-save" class="btn btn-success" style="flex:1;">✓ Ajouter</button>
-                    <button id="menu-produit-cancel" class="btn btn-secondary" style="flex:1;">✗ Annuler</button>
+                <input type="text" id="menu-produit-nom" placeholder="Nom du produit" autocomplete="off" class="form-input">
+                <textarea id="menu-produit-description" placeholder="Description (optionnel)" autocomplete="off" class="form-input"></textarea>
+                <input type="number" id="menu-produit-prix" placeholder="Prix (€)" step="0.01" min="0" autocomplete="off" class="form-input mb-2">
+                <div class="flex gap-2">
+                    <button id="menu-produit-save" class="btn btn-success flex-1">✓ Ajouter</button>
+                    <button id="menu-produit-cancel" class="btn btn-secondary flex-1">✗ Annuler</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="renderer.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
