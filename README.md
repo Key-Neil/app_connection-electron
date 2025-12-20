@@ -177,11 +177,14 @@ touch .env
 # 4. Éditer .env et ajouter votre connexion MySQL
 # DATABASE_URL="mysql://root:votreMotDePasse@localhost:3306/app_connection"
 
-# 5. Initialiser la base de données
+# 5. Créer la base de données
+mysql -u root -p < scripts/create-db.sql
+
+# 6. Initialiser le schéma
 npx prisma db push
 npm run seed
 
-# 6. Lancer l'application
+# 7. Lancer l'application
 npm start
 ```
 
@@ -200,11 +203,14 @@ type nul > .env
 REM 4. Éditer .env avec le Bloc-notes et ajouter :
 REM DATABASE_URL="mysql://root:votreMotDePasse@localhost:3306/app_connection"
 
-REM 5. Initialiser la base de données
+REM 5. Créer la base de données
+mysql -u root -p < scripts\create-db.sql
+
+REM 6. Initialiser le schéma
 npx prisma db push
 npm run seed
 
-REM 6. Lancer l'application
+REM 7. Lancer l'application
 npm start
 ```
 
@@ -223,11 +229,14 @@ New-Item .env -ItemType File
 # 4. Éditer .env avec le Bloc-notes et ajouter :
 # DATABASE_URL="mysql://root:votreMotDePasse@localhost:3306/app_connection"
 
-# 5. Initialiser la base de données
+# 5. Créer la base de données
+mysql -u root -p < scripts/create-db.sql
+
+# 6. Initialiser le schéma
 npx prisma db push
 npm run seed
 
-# 6. Lancer l'application
+# 7. Lancer l'application
 npm start
 ```
 
@@ -312,9 +321,30 @@ DATABASE_URL="mysql://root:password:@localhost:3306/app_connection"
 DATABASE_URL="mysql://root:password@localhost:3306/app_connection"
 ```
 
-### Étape 5 : Initialiser la base de données
+### Étape 5 : Créer la base de données
 
-Créez le schéma de la base de données :
+Créez un script SQL pour initialiser la base de données :
+
+**Créez un fichier `scripts/create-db.sql` :**
+```sql
+-- Créer la base de données si elle n'existe pas
+CREATE DATABASE IF NOT EXISTS app_connection;
+
+-- Sélectionner la base de données
+USE app_connection;
+
+-- Les tables seront créées par Prisma lors du prochain push
+```
+
+Puis exécutez le script :
+
+```bash
+mysql -u root -p < scripts/create-db.sql
+```
+
+### Étape 6 : Initialiser le schéma avec Prisma
+
+Synchronisez le schéma Prisma avec la base de données :
 
 ```bash
 npx prisma db push
@@ -325,6 +355,8 @@ npx prisma db push
 ✅ MySQL database app_connection created at localhost:3306
 ✅ Your database is now in sync with your Prisma schema
 ```
+
+### Étape 7 : Insérer les données de test
 
 Puis insérez les données de test :
 
