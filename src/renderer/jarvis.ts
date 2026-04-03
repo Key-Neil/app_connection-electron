@@ -3,11 +3,18 @@ interface ChatMessage {
   content: string;
 }
 
+interface JarvisBridge {
+  getConfig: () => Promise<{ hasApiKey: boolean; rules: string[] }>;
+  saveConfig: (apiKey: string | null, rules: string[]) => Promise<{ success: boolean; error?: string }>;
+  chat: (history: ChatMessage[], userMessage: string) => Promise<{ success: boolean; reply?: string; error?: string }>;
+  search: (query: string) => Promise<{ success: boolean; results?: string; error?: string }>;
+}
+
 let chatHistory: ChatMessage[] = [];
 let jarvisRules: string[] = [];
 
-function getJarvisBridge(): any {
-  return (window as any).jarvis;
+function getJarvisBridge(): JarvisBridge | undefined {
+  return (window as any).jarvis as JarvisBridge | undefined;
 }
 
 function escapeHtml(text: string): string {
@@ -243,7 +250,8 @@ export function initJarvisModule() {
       const newRuleInput = document.getElementById('jarvis-new-rule') as HTMLInputElement | null;
       if (!newRuleInput) return;
       const rule = newRuleInput.value.trim();
-      if (rule && !jarvisRules.includes(rule)) {
+      const rulesSet = new Set(jarvisRules);
+      if (rule && !rulesSet.has(rule)) {
         jarvisRules.push(rule);
         renderRulesList();
         newRuleInput.value = '';

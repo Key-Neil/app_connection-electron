@@ -2,6 +2,7 @@ import { app, safeStorage } from 'electron';
 import path from 'path';
 import fs from 'fs';
 import https from 'https';
+import type { IncomingMessage, RequestOptions } from 'http';
 
 const CONFIG_FILE = path.join(app.getPath('userData'), 'jarvis-config.json');
 const MAX_INPUT_LENGTH = 4000;
@@ -141,7 +142,7 @@ function httpsGet(url: string): Promise<string> {
         'Accept': 'application/json',
       },
     };
-    const req = https.get(options as any, (res: any) => {
+    const req = https.get(options as RequestOptions, (res: IncomingMessage) => {
       let data = '';
       res.on('data', (chunk: Buffer) => { data += chunk; });
       res.on('end', () => resolve(data));
@@ -224,7 +225,7 @@ export async function jarvisChat(
     `Tu ne génères jamais de contenu dangereux, illégal ou nuisible.` +
     rulesText;
 
-  const validatedHistory: { role: string; content: string }[] = [];
+  const validatedHistory: ChatMessage[] = [];
   if (Array.isArray(history)) {
     for (const msg of history.slice(-10)) {
       if (
@@ -237,7 +238,7 @@ export async function jarvisChat(
     }
   }
 
-  const requestMessages = [
+  const requestMessages: Array<{ role: string; content: string }> = [
     { role: 'system', content: systemPrompt },
     ...validatedHistory,
     { role: 'user', content: sanitizedMessage },
