@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import path from 'path';
 import bcrypt from 'bcryptjs';
 import prisma from './utilitaires/prisma';
+import { getJarvisConfig, saveJarvisConfig, jarvisChat, jarvisSearch, ChatMessage } from './jarvis-service';
 const sectionsUtil = require('./utilitaires/sections');
 
 function createWindow() {
@@ -712,4 +713,20 @@ ipcMain.handle('admin:deleteRestaurant', async (event, restaurantId) => {
   } catch (err: any) {
     return { success: false, error: err.message };
   }
+});
+
+ipcMain.handle('jarvis:getConfig', async () => {
+  return getJarvisConfig();
+});
+
+ipcMain.handle('jarvis:saveConfig', async (event, apiKey: string | null, rules: string[]) => {
+  return saveJarvisConfig(apiKey, rules);
+});
+
+ipcMain.handle('jarvis:chat', async (event, history: ChatMessage[], userMessage: string) => {
+  return jarvisChat(history, userMessage);
+});
+
+ipcMain.handle('jarvis:search', async (event, query: string) => {
+  return jarvisSearch(query);
 });

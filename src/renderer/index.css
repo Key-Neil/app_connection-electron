@@ -875,3 +875,113 @@ tbody tr:last-child td { border-bottom: none; }
   body { background: white; }
   .container { box-shadow: none; border: 1px solid var(--border); }
 }
+
+/* ===== JARVIS ===== */
+.jarvis-layout {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 120px);
+  min-height: 400px;
+}
+.jarvis-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.jarvis-header h1 { margin: 0; }
+.jarvis-header-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.jarvis-messages {
+  flex: 1;
+  overflow-y: auto;
+  border: 2px solid var(--border);
+  border-radius: var(--radius);
+  background: #fff;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.jarvis-msg {
+  max-width: 85%;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  line-height: 1.6;
+}
+.jarvis-msg-user {
+  align-self: flex-end;
+  background: var(--primary);
+  color: #fff;
+}
+.jarvis-msg-assistant {
+  align-self: flex-start;
+  background: var(--light);
+  border: 1px solid var(--border);
+  color: var(--dark);
+}
+.jarvis-msg-system {
+  align-self: center;
+  background: #fff3cd;
+  border: 1px solid var(--warning);
+  color: #856404;
+  font-size: 0.9rem;
+  max-width: 100%;
+}
+.jarvis-msg-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+  opacity: 0.8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.jarvis-msg-content { word-break: break-word; }
+.jarvis-input-area {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+}
+.jarvis-textarea {
+  flex: 1;
+  min-height: 60px;
+  max-height: 160px;
+  resize: vertical;
+}
+.jarvis-send-btn {
+  height: 60px;
+  padding: 0 1.5rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.jarvis-rule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.75rem;
+  background: var(--light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 0.4rem;
+  gap: 0.5rem;
+}
+.jarvis-rule-text {
+  flex: 1;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+.jarvis-no-rules {
+  color: var(--secondary);
+  font-style: italic;
+  margin: 0;
+}
+.jarvis-key-ok { color: var(--success); font-weight: 600; }
+.jarvis-key-missing { color: var(--danger); font-weight: 600; }
+.jarvis-settings-ok { color: var(--success); font-size: 0.9rem; }
+.jarvis-settings-error { color: var(--danger); font-size: 0.9rem; }

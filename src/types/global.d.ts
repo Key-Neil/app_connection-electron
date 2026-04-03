@@ -49,5 +49,12 @@ export interface Window {
     adminUpdateProduit: (produitId: number, data: any) => Promise<{ success: boolean; produit?: any; error?: string }>;
     adminDeleteProduit: (produitId: number) => Promise<{ success: boolean; error?: string }>;
   };
+
+  jarvis: {
+    getConfig: () => Promise<{ hasApiKey: boolean; rules: string[] }>;
+    saveConfig: (apiKey: string | null, rules: string[]) => Promise<{ success: boolean; error?: string }>;
+    chat: (history: Array<{ role: 'user' | 'assistant'; content: string }>, userMessage: string) => Promise<{ success: boolean; reply?: string; error?: string }>;
+    search: (query: string) => Promise<{ success: boolean; results?: string; error?: string }>;
+  };
 }
 

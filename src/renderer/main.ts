@@ -8,6 +8,7 @@ import { loadClientCommandes } from './commandes.js';
 import { loadCookRestaurants, loadCookCommandes } from './cook.js';
 import { loadLivreurLivraisons, loadLivreurAvailableCommandes } from './livreur.js';
 import { initAdminModule, loadAdmin, loadAdminCommandes, loadAdminRestaurants } from './admin.js';
+import { initJarvisModule, loadJarvisView } from './jarvis.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   initInputObserver();
@@ -16,6 +17,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initAuthModule();
   initRestaurantsModule();
   initAdminModule();
+  initJarvisModule();
+
+  document.getElementById('nav-jarvis')?.addEventListener('click', () => {
+    showView('view-jarvis');
+    loadJarvisView();
+  });
 
   document.getElementById('nav-restaurants')?.addEventListener('click', () => {
     showView('view-restaurants');

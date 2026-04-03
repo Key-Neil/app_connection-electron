@@ -16,6 +16,7 @@
             <button id="nav-cook" class="nav-btn d-none">👨‍🍳 Cuisinier</button>
             <button id="nav-livreur" class="nav-btn d-none">🚚 Livreur</button>
             <button id="nav-admin" class="nav-btn d-none">⚙️ Admin</button>
+            <button id="nav-jarvis" class="nav-btn">🤖 Jarvis</button>
             <button id="nav-logout">🚪 Déconnexion</button>
         </div>
     </nav>
@@ -256,6 +257,54 @@
                 <div class="flex gap-2">
                     <button id="menu-produit-save" class="btn btn-success flex-1">✓ Ajouter</button>
                     <button id="menu-produit-cancel" class="btn btn-secondary flex-1">✗ Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-jarvis" class="view">
+        <div class="container">
+            <div class="jarvis-layout">
+                <div class="jarvis-header">
+                    <h1>🤖 Jarvis</h1>
+                    <div class="jarvis-header-actions">
+                        <button id="jarvis-search-btn" class="btn btn-secondary btn-sm">🔍 Recherche web</button>
+                        <button id="jarvis-settings-btn" class="btn btn-secondary btn-sm">⚙️ Paramètres</button>
+                        <button id="jarvis-clear" class="btn btn-secondary btn-sm">🗑️ Effacer</button>
+                    </div>
+                </div>
+
+                <div id="jarvis-search-panel" class="card d-none">
+                    <h3>🔍 Recherche web</h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="jarvis-search-input" placeholder="Rechercher sur le web..." autocomplete="off" class="form-input">
+                        <button id="jarvis-do-search" class="btn btn-success">Rechercher</button>
+                    </div>
+                </div>
+
+                <div id="jarvis-settings-panel" class="card d-none">
+                    <h3>⚙️ Paramètres Jarvis</h3>
+                    <div id="jarvis-api-key-status" class="jarvis-key-missing mb-2"></div>
+                    <label class="form-label">Clé API OpenAI (laissez vide pour conserver l'actuelle)</label>
+                    <input type="password" id="jarvis-api-key" placeholder="sk-..." autocomplete="off" class="form-input mb-2">
+                    <label class="form-label">Règles personnalisées (Jarvis les respectera dans chaque réponse)</label>
+                    <div id="jarvis-rules-list" class="mb-2"></div>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="jarvis-new-rule" placeholder="Ex: Réponds toujours en 3 points maximum" autocomplete="off" class="form-input">
+                        <button id="jarvis-add-rule" class="btn btn-success">➕ Ajouter</button>
+                    </div>
+                    <div id="jarvis-settings-msg" class="mb-2"></div>
+                    <div class="flex gap-2">
+                        <button id="jarvis-settings-save" class="btn btn-success flex-1">✓ Enregistrer</button>
+                        <button id="jarvis-settings-cancel" class="btn btn-secondary flex-1">✗ Annuler</button>
+                    </div>
+                </div>
+
+                <div id="jarvis-messages" class="jarvis-messages"></div>
+
+                <div class="jarvis-input-area">
+                    <textarea id="jarvis-input" placeholder="Parlez à Jarvis... (Entrée pour envoyer, Maj+Entrée pour saut de ligne)" autocomplete="off" class="form-input jarvis-textarea"></textarea>
+                    <button id="jarvis-send" class="btn jarvis-send-btn">➤ Envoyer</button>
                 </div>
             </div>
         </div>

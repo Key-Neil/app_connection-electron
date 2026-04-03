@@ -117,4 +117,17 @@ contextBridge.exposeInMainWorld('api', {
     ipcRenderer.invoke('admin:deleteProduit', restaurantId, sectionId, produitId),
 });
 
+contextBridge.exposeInMainWorld('jarvis', {
+  getConfig: () =>
+    ipcRenderer.invoke('jarvis:getConfig'),
+
+  saveConfig: (apiKey: string | null, rules: string[]) =>
+    ipcRenderer.invoke('jarvis:saveConfig', apiKey, rules),
+
+  chat: (history: any[], userMessage: string) =>
+    ipcRenderer.invoke('jarvis:chat', history, userMessage),
+
+  search: (query: string) =>
+    ipcRenderer.invoke('jarvis:search', query),
+});
 
